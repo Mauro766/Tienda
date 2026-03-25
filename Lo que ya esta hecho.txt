@@ -1,0 +1,9 @@
+✅ JWT
+✅ Registro
+✅ Login
+✅ Roles
+✅ CRUD de ropa
+✅ Filtros y paginación
+✅ Subida de imagen
+✅ Activar / desactivar
+✅ Endpoint /me

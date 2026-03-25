@@ -1,0 +1,176 @@
+body {
+    margin: 0;
+    font-family: system-ui;
+    font-size: larger;
+
+}
+
+/* ===== HEADER ===== */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 10;
+
+    display: flex;
+    align-items: center;
+    padding: 1%;
+    background-color: rgba(0, 0, 0, 0);
+
+    transition: background-color 0.3s ease; /* 🔥 */
+}
+
+.header.scrolled {
+    background-color: rgba(206, 206, 206, 0.95);
+}
+
+/*LLamo a header right img que uso mas abajo*/
+.header.scrolled .header-right-img {
+    filter: invert(0);
+}
+
+.header a {
+    color: #ffffff;
+    transition: color 0.3s ease;
+}
+
+.header.scrolled a {
+    color: #000;
+}
+
+/* Cada sección ocupa 1/3 */
+.header-left,
+.header-center,
+.header-right {
+    flex: 1;
+}
+
+/* Alineaciones */
+.header-left {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.header-center {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.header-right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex: 1;
+    gap: 3px;
+}
+
+.header-right a {
+    display: flex;
+    align-items: center;
+}
+
+.header-right-img {
+    width: 45px;        /* tamaño controlado */
+    height: 45px;
+    object-fit: cover;  /* Cambiado a cover para mantener la proporción */
+    cursor: pointer;
+    opacity: 80%;
+    filter: invert();
+}
+
+
+
+.header-div {
+    display: flex;
+    gap: 20px;
+}
+
+a {
+    text-decoration: none;
+    color: aliceblue;
+}
+
+/* ===== MAIN / HERO ===== */
+.main {
+    width: 100%;
+}
+
+/* HERO ocupa toda la pantalla */
+.hero {
+    position: relative;
+    height: 100vh;          /* 🔥 toda la altura de la pantalla */
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Imagen de fondo */
+.hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;      /* 🔥 no se deforma */
+    display: block;
+}
+
+/* Logo encima */
+.hero-logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40%;
+    z-index: 2;
+    
+    cursor: pointer;
+    transition: 50ms ease-out;
+    filter: drop-shadow(10px 10px 10px black);
+}
+.hero-logo:hover{
+    width: 42%;
+}
+
+/* Redes sociales */
+.hero-redessociales {
+     position: absolute;
+    top: 90%;                 /* más lógico */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+
+    display: flex;
+    flex-direction: row;
+    gap: 16px;  
+}
+
+.hero-redessociales-ig {
+    width: 36px;
+    height: 36px;
+    opacity: 50%;
+    filter: invert();
+    cursor: pointer;
+}
+
+.what{
+    position: fixed;
+    top: 85%;                 /* más lógico */
+    left: 93%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: row;
+    gap: 16px;  
+}
+
+.whatsapp{
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+}
+
+
+/* Contenido de abajo */
+.content {
+    padding: 60px;
+}

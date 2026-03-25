@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Prueba</title>
+</head>
+<body>
+
+<h2>Agregar nombre</h2>
+
+<input type="text" id="nombre" placeholder="Nombre">
+<input type="number" id="edad" placeholder="Edad">
+<button onclick="agregar()">Agregar</button>
+
+<h2>Lista</h2>
+<ul id="lista"></ul>
+
+<script>
+    function agregar() {
+    const nombreInput = document.getElementById("nombre");
+    const edadInput = document.getElementById("edad");
+
+    fetch("/agregar", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            nombre: nombreInput.value,
+            edad: parseInt(edadInput.value)
+        })
+    })
+    .then(() => {
+        cargar();               // refresca la tabla
+        nombreInput.value = ""; // limpia input
+        edadInput.value = "";
+    });
+
+}
+
+    function cargar() {
+        fetch("/mostrar")
+            .then(res => res.json())
+            .then(data => {
+                const lista = document.getElementById("lista");
+                lista.innerHTML = "";
+                data.forEach(n => {
+                    lista.innerHTML += `<li>${n.nombre} - ${n.edad}</li>`;
+                });
+                
+            });
+    }
+
+    cargar();
+</script>
+
+</body>
+</html>
