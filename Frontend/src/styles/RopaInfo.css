@@ -1,0 +1,274 @@
+/* =========================================
+   CONTENEDOR PRINCIPAL
+========================================= */
+.producto-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    margin-top: 5%;
+    padding: 20px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: #000;
+}
+
+.producto-layout {
+    display: flex;
+    gap: 40px; /* Espacio entre la foto y la info */
+    align-items: flex-start;
+}
+
+/* =========================================
+   COLUMNA IZQUIERDA: GALERÍA DE IMÁGENES
+========================================= */
+.ropa-media {
+    flex: 1; /* Ocupa el 50% del ancho */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.ropa-media__principal img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    background-color: #f5f5f5; /* Fondo grisecito simulando estudio */
+}
+
+.ropa-media__thumbnails {
+    display: flex;
+    gap: 10px;
+}
+
+.ropa-media__thumbnails img {
+    width: 60px;
+    height: 80px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.ropa-media__thumbnails img.active {
+    border: 1px solid #000; /* Borde para la miniatura seleccionada */
+}
+
+/* =========================================
+   COLUMNA DERECHA: INFORMACIÓN
+========================================= */
+.ropa-info {
+    flex: 1; /* Ocupa el otro 50% */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.ropa-info__header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ropa-info__title {
+    font-size: 1.5rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.ropa-info__price {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.ropa-info__installments {
+    color: #d0021b; /* Rojo de las cuotas */
+    font-weight: bold;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.ropa-info__shipping {
+    font-size: 0.85rem;
+    text-decoration: underline;
+    margin: 0;
+}
+
+.ropa-info__divider {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 10px 0;
+}
+
+/* Textos de advertencia y modelo */
+.ropa-info__details {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-size: 0.9rem;
+}
+
+.ropa-info__warning {
+    margin: 0;
+    line-height: 1.4;
+}
+
+.ropa-info__model p {
+    margin: 4px 0;
+}
+
+/* =========================================
+   SELECTORES DE TALLE Y CANTIDAD
+========================================= */
+.ropa-info__sizes {
+    margin-top: 10px;
+}
+
+.ropa-info__sizes p {
+    margin-bottom: 10px;
+}
+
+.ropa-info__sizes-list {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.size-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%; /* Hace el botón circular */
+    border: 1px solid #ccc;
+    background-color: transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.size-btn:hover {
+    border-color: #666;
+}
+
+.size-btn.active {
+    border: 2px solid #000;
+    font-weight: bold;
+}
+
+.ropa-info__quantity {
+    margin-top: 10px;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 120px;
+    border: 1px solid #ccc;
+    border-radius: 25px; /* Forma de pastilla */
+    padding: 5px 15px;
+    margin-top: 10px;
+}
+
+.quantity-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.quantity-number {
+    font-size: 1rem;
+}
+
+/* =========================================
+   BOTONES DE ACCIÓN (COMPRA)
+========================================= */
+.ropa-info__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-primary, .btn-secondary {
+    width: 100%;
+    padding: 15px;
+    border-radius: 30px; /* Bordes bien redondeados */
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-primary {
+    background-color: #000;
+    color: #fff;
+    border: none;
+}
+
+.btn-secondary {
+    background-color: #000;
+    color: #fff;
+    border: none;
+}
+
+.btn-primary:hover, .btn-secondary:hover {
+    opacity: 0.8;
+}
+
+/* =========================================
+   NOTAS, REDES Y FOOTER
+========================================= */
+.ropa-info__note {
+    font-size: 0.8rem;
+    color: #555;
+    line-height: 1.4;
+    margin-top: 10px;
+}
+
+.ropa-info__share {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+    font-size: 0.85rem;
+}
+
+.share-icons span {
+    color: #888;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+.ropa-description-footer {
+    margin-top: 60px;
+    text-align: center;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.card-section{
+    margin: 2%;
+    padding: 2%;
+}
+
+.card-section-destacados{
+    display: flex;
+    justify-content: center;
+    
+}
+
+/* =========================================
+   RESPONSIVE (Para celulares)
+========================================= */
+@media (max-width: 768px) {
+    .producto-layout {
+        flex-direction: column; /* Apila la info abajo de la foto */
+        gap: 20px;
+    }
+    
+    .ropa-media, .ropa-info {
+        width: 100%;
+    }
+}

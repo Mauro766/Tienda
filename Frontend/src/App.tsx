@@ -1,8 +1,8 @@
+import Home from "./pages/Home";
+import RopaInfo from "./pages/RopaInfo";
 
 function App() {
-  return (
-    <h1>Medicam App</h1>
-  )
+  return <RopaInfo />;
 }
 
-export default App
+export default App;
