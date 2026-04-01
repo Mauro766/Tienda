@@ -4,10 +4,15 @@
 .producto-container {
     max-width: 1200px;
     margin: 0 auto;
-    margin-top: 5%;
-    padding: 20px;
+    margin-top: 113px;
+    padding: 28px;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    color: #000;
+    color: #111;
+    border: 1px solid #e3e5e8;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(5px);
+    box-shadow: 0 16px 30px rgba(18, 22, 27, 0.08);
 }
 
 .producto-layout {
@@ -26,11 +31,64 @@
     gap: 15px;
 }
 
+.ropa-media__principal {
+    position: relative;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
 .ropa-media__principal img {
     width: 100%;
-    height: auto;
-    object-fit: cover;
-    background-color: #f5f5f5; /* Fondo grisecito simulando estudio */
+    aspect-ratio: 3 / 4; /* Fuerza todas las imágenes a tener exactamente la misma proporción */
+    object-fit: cover; /* Centra y recorta manteniendo la calidad */
+    background-color: #eef0f3; /* Fondo grisecito simulando estudio */
+    border-radius: 14px;
+    display: block;
+}
+
+.fade-in-image {
+    animation: fadeEffect 0.4s ease-in-out;
+}
+
+@keyframes fadeEffect {
+    from {
+        opacity: 0.4;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.7);
+    color: #333;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: background 0.2s, color 0.2s;
+}
+
+.carousel-btn:hover {
+    background: #fff;
+    color: #000;
+}
+
+.carousel-btn--prev {
+    left: 10px;
+}
+
+.carousel-btn--next {
+    right: 10px;
 }
 
 .ropa-media__thumbnails {
@@ -44,6 +102,7 @@
     object-fit: cover;
     cursor: pointer;
     border: 1px solid transparent;
+    border-radius: 10px;
 }
 
 .ropa-media__thumbnails img.active {
@@ -236,7 +295,7 @@
 .share-icons span {
     color: #888;
     cursor: pointer;
-    margin-right: 8px;
+
 }
 
 .ropa-description-footer {
@@ -245,24 +304,39 @@
     font-size: 0.85rem;
     line-height: 1.5;
     padding-top: 20px;
-    border-top: 1px solid #eee;
+
 }
 
 .card-section{
-    margin: 2%;
-    padding: 2%;
+    max-width: 1200px;
+    margin: 26px auto 0;
+    padding: 24px;
+    text-align: center;
+    border: 1px solid #e3e5e8;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(5px);
+    box-shadow: 0 16px 30px rgba(18, 22, 27, 0.08);
 }
 
 .card-section-destacados{
-    display: flex;
-    justify-content: center;
-    
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    width: 100%;
 }
 
 /* =========================================
    RESPONSIVE (Para celulares)
 ========================================= */
 @media (max-width: 768px) {
+
+    .producto-container {
+
+    margin-top: 80px;
+
+}
+
     .producto-layout {
         flex-direction: column; /* Apila la info abajo de la foto */
         gap: 20px;

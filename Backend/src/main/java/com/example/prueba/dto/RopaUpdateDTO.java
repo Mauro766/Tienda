@@ -1,6 +1,7 @@
 package com.example.prueba.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
@@ -21,7 +22,7 @@ public class RopaUpdateDTO {
     private Integer stock;
     private String categoria;
     private String marca;
-    private String talla;
+    private List<String> tallas;
     private String color;
     private String imagenUrl;
     private Boolean activo;
@@ -76,12 +77,12 @@ public class RopaUpdateDTO {
         this.marca = marca;
     }
 
-    public String getTalla() {
-        return talla;
+    public List<String> getTallas() {
+        return tallas;
     }
 
-    public void setTalla(String talla) {
-        this.talla = talla;
+    public void setTallas(List<String> tallas) {
+        this.tallas = tallas;
     }
 
     public String getColor() {

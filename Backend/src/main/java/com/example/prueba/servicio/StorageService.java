@@ -19,18 +19,18 @@ public class StorageService {
 
     public String guardarArchivo(MultipartFile archivo) throws IOException {
 
-    File directorio = new File(UPLOAD_DIR);
+        File directorio = new File(UPLOAD_DIR);
 
-    if (!directorio.exists()) {
-        directorio.mkdirs();
+        if (!directorio.exists()) {
+            directorio.mkdirs();
+        }
+
+        String nombreArchivo = UUID.randomUUID() + "_" + archivo.getOriginalFilename();
+
+        Path ruta = Paths.get(UPLOAD_DIR + nombreArchivo);
+
+        Files.copy(archivo.getInputStream(), ruta);
+
+        return nombreArchivo;
     }
-
-    String nombreArchivo = UUID.randomUUID() + "_" + archivo.getOriginalFilename();
-
-    Path ruta = Paths.get(UPLOAD_DIR + nombreArchivo);
-
-    Files.copy(archivo.getInputStream(), ruta);
-
-    return nombreArchivo;
-}
 }

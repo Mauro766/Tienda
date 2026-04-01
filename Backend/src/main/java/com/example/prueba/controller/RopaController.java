@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,12 +39,13 @@ public class RopaController {
     }
 
     // 🔹 Crear ropa (POST)
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(consumes = "multipart/form-data")
     public RopaDTO crear(
-            @RequestPart("ropa") RopaCreateDTO dto,
-            @RequestPart("imagen") MultipartFile imagen) throws Exception {
+            @Valid @RequestPart("ropa") RopaCreateDTO dto,
+            @RequestPart(value = "imagenes", required = false) List<MultipartFile> imagenes) throws Exception {
 
-        return ropaService.crear(dto, imagen);
+        return ropaService.crear(dto, imagenes);
     }
 
     // 🔹 Listar todas las ropas activas
@@ -80,6 +82,7 @@ public class RopaController {
     }
 
     // Lista todos sin importar si est activo o no solo para admin
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin")
     public List<RopaDTO> listarTodos() {
         return ropaService.listarTodos();
@@ -92,6 +95,7 @@ public class RopaController {
     }
 
     // 🔹 Actualizar (PUT)
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public RopaDTO actualizar(
             @PathVariable Long id,
@@ -101,20 +105,23 @@ public class RopaController {
     }
 
     // 🔹 desactivar ropa
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/desactivar/{id}")
     public void desactivar(@PathVariable Long id) {
         ropaService.desactivar(id);
     }
 
     // 🔹 activar ropa
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/reactivar/{id}")
     public void activar(@PathVariable Long id) {
         ropaService.activar(id);
     }
+
     // Borrar el producto definitivamente
-    /*     * @DeleteMapping("/{id}")
-     * public void eliminar(@PathVariable Long id) {
-     * ropaService.eliminar(id);
-     * }
-     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public void eliminar(@PathVariable Long id) {
+        ropaService.eliminar(id);
+    }
 }

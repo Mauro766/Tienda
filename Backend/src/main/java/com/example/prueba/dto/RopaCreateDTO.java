@@ -1,6 +1,7 @@
 package com.example.prueba.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -28,12 +29,11 @@ public class RopaCreateDTO {
     @NotBlank(message = "La marca es obligatoria")
     private String marca;
 
-    @NotBlank(message = "La talla es obligatoria")
-    private String talla;
+    private List<String> tallas;
 
     @NotBlank(message = "El color es obligatorio")
     private String color;
-    private String imagenUrl;
+    private List<String> imagenesUrl;
 
     public String getNombre() {
         return nombre;
@@ -83,12 +83,12 @@ public class RopaCreateDTO {
         this.marca = marca;
     }
 
-    public String getTalla() {
-        return talla;
+    public List<String> getTallas() {
+        return tallas;
     }
 
-    public void setTalla(String talla) {
-        this.talla = talla;
+    public void setTallas(List<String> tallas) {
+        this.tallas = tallas;
     }
 
     public String getColor() {
@@ -99,12 +99,12 @@ public class RopaCreateDTO {
         this.color = color;
     }
 
-    public String getImagenUrl() {
-        return imagenUrl;
+    public List<String> getImagenesUrl() {
+        return imagenesUrl;
     }
 
-    public void setImagenUrl(String imagenUrl) {
-        this.imagenUrl = imagenUrl;
+    public void setImagenesUrl(List<String> imagenesUrl) {
+        this.imagenesUrl = imagenesUrl;
     }
 
 }

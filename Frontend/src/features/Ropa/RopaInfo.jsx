@@ -1,6 +1,20 @@
+import { useState } from "react";
 import "../../styles/RopaInfo.css";
 
-function RopaInfo({ nombre, precio, informacion }) {
+function RopaInfo({ nombre, precio, descripcion, imagenesUrl, tallas, color, categoria }) {
+    const formatUrl = (url) => url?.startsWith("/uploads/") ? `http://localhost:8081${url}` : url;
+    const rawImages = Array.isArray(imagenesUrl) && imagenesUrl.length > 0 ? imagenesUrl : ["/Campera.jpg"];
+    const validImages = rawImages.map(formatUrl);
+    
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    const handlePrev = () => {
+        setCurrentIndex((prev) => (prev === 0 ? validImages.length - 1 : prev - 1));
+    };
+
+    const handleNext = () => {
+        setCurrentIndex((prev) => (prev === validImages.length - 1 ? 0 : prev + 1));
+    };
     return (
         <div className="producto-container">
             
@@ -10,14 +24,30 @@ function RopaInfo({ nombre, precio, informacion }) {
                 {/* COLUMNA IZQUIERDA: GALERÍA DE IMÁGENES */}
                 <div className="ropa-media">
                     <div className="ropa-media__principal">
-                        <img src="/Campera.jpg" alt={nombre} />
+                        <img key={currentIndex} src={validImages[currentIndex]} alt={nombre} className="fade-in-image" />
+                        {validImages.length > 1 && (
+                            <>
+                                <button className="carousel-btn carousel-btn--prev" onClick={handlePrev}>
+                                    &#10094;
+                                </button>
+                                <button className="carousel-btn carousel-btn--next" onClick={handleNext}>
+                                    &#10095;
+                                </button>
+                            </>
+                        )}
                     </div>
                     {/* Miniaturas de la galería */}
                     <div className="ropa-media__thumbnails">
-                        <img src="/thumb1.jpg" alt="vista 1" />
-                        <img src="/thumb2.jpg" alt="vista 2" />
-                        <img src="/thumb3.jpg" alt="vista 3" />
-                        <img src="/thumb4.jpg" alt="vista 4" className="active" />
+                        {validImages.map((img, index) => (
+                            <img 
+                                key={index} 
+                                src={img} 
+                                alt={`${nombre} vista ${index + 1}`} 
+                                className={currentIndex === index ? "active" : ""}
+                                onClick={() => setCurrentIndex(index)}
+                                style={{ cursor: "pointer" }}
+                            />
+                        ))}
                     </div>
                 </div>
 
@@ -41,21 +71,19 @@ function RopaInfo({ nombre, precio, informacion }) {
                         </p>
 
                         <div className="ropa-info__model">
-                            <p>🧍🏼 ALTURA MODELO: 1.80</p>
-                            <p>📏 TALLE: 32</p>
-                            <p>🚩 FIT: Balloon</p>
+                            <p>🏷 CATEGORÍA: {categoria || "General"}</p>
+                            <p>🎨 COLOR: {color || "Variado"}</p>
+                            <p>📏 TALLES: {Array.isArray(tallas) && tallas.length > 0 ? tallas.join(", ") : "Único"}</p>
                         </div>
 
                         {/* TALLES CON ESTILO DE BOTONES CIRCULARES */}
                         <div className="ropa-info__sizes">
-                            <p>Size: <strong>28</strong></p>
+                            <p>Talles disponibles:</p>
                             <div className="ropa-info__sizes-list">
-                                <button className="size-btn active">28</button>
-                                <button className="size-btn">30</button>
-                                <button className="size-btn">32</button>
-                                <button className="size-btn">34</button>
-                                <button className="size-btn">36</button>
-                                <button className="size-btn">38</button>
+                                {Array.isArray(tallas) && tallas.length > 0
+                                    ? tallas.map(t => <button key={t} className="size-btn">{t}</button>)
+                                    : <button className="size-btn active">Único</button>
+                                }
                             </div>
                         </div>
 
@@ -72,7 +100,8 @@ function RopaInfo({ nombre, precio, informacion }) {
                         {/* BOTONES DE COMPRA */}
                         <div className="ropa-info__actions">
                             <button className="btn-primary">AGREGAR AL CARRITO</button>
-                            <button className="btn-secondary">COMPRAR AHORA</button>
+                            {/* TODO: Integración con Mercado Pago */}
+                            <button className="btn-secondary" id="mercado-pago-btn">COMPRAR AHORA (MercadoPago)</button>
                         </div>
 
                         {/* NOTA EXTRA */}
@@ -97,7 +126,7 @@ function RopaInfo({ nombre, precio, informacion }) {
 
             {/* DESCRIPCIÓN FINAL ABAJO DE TODO */}
             <div className="ropa-description-footer">
-                <p>{informacion}</p>
+                <p>{descripcion}</p>
             </div>
 
         </div>

@@ -6,7 +6,6 @@ import java.util.function.Function;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -16,10 +15,12 @@ public class JwtService {
 
     private final String SECRET_KEY = "clave_super_secreta_muy_larga_para_jwt_seguridad_2026";
 
-    public String generarToken(String username) {
+    // 🔥 ahora recibe el rol
+    public String generarToken(String username, String role) {
 
         return Jwts.builder()
                 .setSubject(username)
+                .claim("role", role) // ✅ agregamos el rol
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
@@ -28,6 +29,11 @@ public class JwtService {
 
     public String extraerUsername(String token) {
         return extraerClaim(token, Claims::getSubject);
+    }
+
+    // 🔥 nuevo método
+    public String extraerRole(String token) {
+        return extraerClaim(token, claims -> claims.get("role", String.class));
     }
 
     public boolean validarToken(String token, UserDetails userDetails) {
@@ -51,5 +57,4 @@ public class JwtService {
     private boolean tokenExpirado(String token) {
         return extraerClaim(token, Claims::getExpiration).before(new Date());
     }
-
 }

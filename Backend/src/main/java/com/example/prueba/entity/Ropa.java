@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
@@ -38,13 +41,23 @@ public class Ropa {
 
     private String marca;
 
-    @Column(nullable = false)
-    private String talla; // S, M, L, XL
+    // TODO: Eliminar esta columna de la DB manualmente (ALTER TABLE ropa DROP COLUMN talla)
+    // Se deja temporalmente para que Hibernate la marque como NULLABLE y no falle el INSERT
+    @Column(name = "talla", nullable = true)
+    private String talla = "DEPRECATED"; 
+
+    @ElementCollection
+    @CollectionTable(name = "ropa_tallas", joinColumns = @JoinColumn(name = "ropa_id"))
+    @Column(name = "talla")
+    private List<String> tallas = new ArrayList<>();
 
     @Column(nullable = false)
     private String color;
 
-    private String imagenUrl;
+    @ElementCollection
+    @CollectionTable(name = "ropa_imagenes", joinColumns = @JoinColumn(name = "ropa_id"))
+    @Column(name = "imagen_url")
+    private List<String> imagenesUrl = new ArrayList<>();
 
     @Column(nullable = false)
     private Boolean activo = true;
@@ -110,12 +123,12 @@ public class Ropa {
         this.marca = marca;
     }
 
-    public String getTalla() {
-        return talla;
+    public List<String> getTallas() {
+        return tallas;
     }
 
-    public void setTalla(String talla) {
-        this.talla = talla;
+    public void setTallas(List<String> tallas) {
+        this.tallas = tallas;
     }
 
     public String getColor() {
@@ -126,12 +139,12 @@ public class Ropa {
         this.color = color;
     }
 
-    public String getImagenUrl() {
-        return imagenUrl;
+    public List<String> getImagenesUrl() {
+        return imagenesUrl;
     }
 
-    public void setImagenUrl(String imagenUrl) {
-        this.imagenUrl = imagenUrl;
+    public void setImagenesUrl(List<String> imagenesUrl) {
+        this.imagenesUrl = imagenesUrl;
     }
 
     public Boolean getActivo() {

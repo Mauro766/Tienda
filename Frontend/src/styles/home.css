@@ -1,0 +1,99 @@
+.home-main {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 20px 20px 10px;
+  display: grid;
+  gap: 18px;
+}
+
+.home-main .content {
+  padding: 6px 0;
+}
+
+.home-benefits {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.benefit-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border-radius: 16px;
+  border: 1px solid #e1e4e8;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 10px 20px rgba(12, 18, 24, 0.08);
+}
+
+.benefit-card img {
+  width: 28px;
+  height: 28px;
+  opacity: 0.78;
+}
+
+.benefit-card h3 {
+  margin: 0;
+  font-size: 0.93rem;
+}
+
+.benefit-card p {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  color: #626872;
+}
+
+.home-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.category-pill {
+  border: 1px solid #d8dde3;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 6px 14px rgba(15, 22, 30, 0.06);
+  padding: 0.52rem 0.9rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #2a2f35;
+  transition: transform 160ms ease, border-color 160ms ease;
+}
+
+.category-pill:hover {
+  transform: translateY(-2px);
+  border-color: #b7c0cc;
+}
+
+.content-head {
+  text-align: center;
+}
+
+.content-subtitle {
+  margin: 0.3rem 0 0;
+  color: #5f646e;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 960px) {
+  .home-benefits {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-main {
+    padding: 12px 12px 0;
+    gap: 12px;
+  }
+
+  .benefit-card {
+    padding: 0.8rem;
+  }
+
+  .content-subtitle {
+    font-size: 0.84rem;
+  }
+}

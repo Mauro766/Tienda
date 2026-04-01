@@ -15,16 +15,15 @@ public class RopaMapper {
         dto.setStock(ropa.getStock());
         dto.setCategoria(ropa.getCategoria());
         dto.setMarca(ropa.getMarca());
-        dto.setTalla(ropa.getTalla());
+        dto.setTallas(ropa.getTallas());
         dto.setColor(ropa.getColor());
-        if (ropa.getImagenUrl() != null) {
-        dto.setImagenUrl("http://localhost:8081/uploads/" + ropa.getImagenUrl());
-    }
+        dto.setImagenesUrl(ropa.getImagenesUrl());
+        dto.setActivo(ropa.getActivo());
 
         return dto;
     }
 
-     public static Ropa toEntity(RopaCreateDTO dto) {
+    public static Ropa toEntity(RopaCreateDTO dto) {
         Ropa ropa = new Ropa();
         ropa.setNombre(dto.getNombre());
         ropa.setDescripcion(dto.getDescripcion());
@@ -32,9 +31,9 @@ public class RopaMapper {
         ropa.setStock(dto.getStock());
         ropa.setCategoria(dto.getCategoria());
         ropa.setMarca(dto.getMarca());
-        ropa.setTalla(dto.getTalla());
+        ropa.setTallas(dto.getTallas() != null ? dto.getTallas() : new java.util.ArrayList<>());
         ropa.setColor(dto.getColor());
-        ropa.setImagenUrl(dto.getImagenUrl());
+        ropa.setImagenesUrl(dto.getImagenesUrl());
 
         // valores por defecto
         ropa.setActivo(true);
