@@ -32,9 +32,12 @@ function RopaInfoPage() {
     if (!producto) return <p style={{textAlign: "center", marginTop: "50px"}}>Producto no encontrado.</p>;
 
     return (
-        <>
-            <Header/>
+        <div className="ropa-info-page-wrapper">
+            <div className="desktop-only">
+                <Header/>
+            </div>
             <RopaInfoDetail 
+                id={id}
                 nombre={producto.nombre} 
                 precio={`$${new Intl.NumberFormat("es-AR").format(producto.precio)}`} 
                 descripcion={producto.descripcion || "Sin descripción adicional."}
@@ -44,8 +47,11 @@ function RopaInfoPage() {
                 categoria={producto.categoria}
             />
             <Destacados/>
-            <Footer/>
-        </>
+            <div className="desktop-only">
+                
+                <Footer/>
+            </div>
+        </div>
     );
 }
 

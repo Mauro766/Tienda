@@ -139,10 +139,12 @@ public class RopaService {
             String categoria,
             Double precioMin,
             Double precioMax,
+            String color,
+            String talla,
             Pageable pageable) {
 
         Page<RopaDTO> page = ropaRepository
-                .filtrar(nombre, categoria, precioMin, precioMax, pageable)
+                .filtrar(nombre, categoria, precioMin, precioMax, color, talla, pageable)
                 .map(RopaMapper::toDTO);
 
         page.forEach(r -> {
@@ -159,7 +161,7 @@ public class RopaService {
     }
 
     // 🔹 Actualizar
-    public RopaDTO actualizar(Long id, RopaUpdateDTO dto) {
+    public RopaDTO actualizar(Long id, RopaUpdateDTO dto, List<MultipartFile> imagenes) throws Exception {
 
         Ropa ropa = ropaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Ropa no encontrada"));
@@ -170,11 +172,25 @@ public class RopaService {
         ropa.setStock(dto.getStock());
         ropa.setCategoria(dto.getCategoria());
         ropa.setMarca(dto.getMarca());
-        ropa.setTallas(dto.getTallas() != null ? dto.getTallas() : new java.util.ArrayList<>());
+        ropa.setTallas(dto.getTallas() != null ? dto.getTallas() : new ArrayList<>());
         ropa.setColor(dto.getColor());
 
         if (dto.getActivo() != null) {
             ropa.setActivo(dto.getActivo());
+        }
+
+        // Si se suben nuevas imagenes, reemplazamos las anteriores
+        if (imagenes != null && !imagenes.isEmpty()) {
+            List<String> nombres = new ArrayList<>();
+            for (MultipartFile img : imagenes) {
+                if (!img.isEmpty()) {
+                    String nombreImagen = storageService.guardarArchivo(img);
+                    nombres.add(nombreImagen);
+                }
+            }
+            if (!nombres.isEmpty()) {
+                ropa.setImagenesUrl(nombres);
+            }
         }
 
         Ropa actualizada = ropaRepository.save(ropa);

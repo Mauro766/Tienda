@@ -1,12 +1,16 @@
 import { useState } from "react";
 import "../../styles/RopaInfo.css";
+import { agregarAlCarrito } from "../../services/CarritoService";
 
-function RopaInfo({ nombre, precio, descripcion, imagenesUrl, tallas, color, categoria }) {
+function RopaInfo({ id, nombre, precio, descripcion, imagenesUrl, tallas, color, categoria }) {
     const formatUrl = (url) => url?.startsWith("/uploads/") ? `http://localhost:8081${url}` : url;
     const rawImages = Array.isArray(imagenesUrl) && imagenesUrl.length > 0 ? imagenesUrl : ["/Campera.jpg"];
     const validImages = rawImages.map(formatUrl);
     
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [quantity, setQuantity] = useState(1);
+    const [adding, setAdding] = useState(false);
+    const [selectedSize, setSelectedSize] = useState(tallas && tallas.length > 0 ? tallas[0] : "Único");
 
     const handlePrev = () => {
         setCurrentIndex((prev) => (prev === 0 ? validImages.length - 1 : prev - 1));
@@ -15,120 +19,130 @@ function RopaInfo({ nombre, precio, descripcion, imagenesUrl, tallas, color, cat
     const handleNext = () => {
         setCurrentIndex((prev) => (prev === validImages.length - 1 ? 0 : prev + 1));
     };
-    return (
-        <div className="producto-container">
+
+    const handleAddToCart = async () => {
+        try {
+            setAdding(true);
+            const producto = { id, nombre, total: parseFloat(precio.replace("$", "").replace(".", "").replace(",", ".")), imagenesUrl };
+            await agregarAlCarrito(producto, quantity);
             
-            {/* CONTENIDO PRINCIPAL: DOS COLUMNAS */}
-            <div className="producto-layout">
-                
-                {/* COLUMNA IZQUIERDA: GALERÍA DE IMÁGENES */}
-                <div className="ropa-media">
-                    <div className="ropa-media__principal">
-                        <img key={currentIndex} src={validImages[currentIndex]} alt={nombre} className="fade-in-image" />
+            // Abrir el carrito automáticamente para feedback
+            window.dispatchEvent(new CustomEvent("abrirCarrito"));
+        } catch (err) {
+            alert(err.message || "No se pudo agregar el producto.");
+        } finally {
+            setAdding(false);
+        }
+    };
+
+    return (
+        <div className="ropa-info-modern">
+            <div className="info-layout">
+                {/* LADO IZQUIERDO: MEDIOS */}
+                <div className="info-media">
+                    <div className="image-showcase">
+                        <img 
+                            key={currentIndex} 
+                            src={validImages[currentIndex]} 
+                            alt={nombre} 
+                            className="main-product-img" 
+                        />
+                        
                         {validImages.length > 1 && (
-                            <>
-                                <button className="carousel-btn carousel-btn--prev" onClick={handlePrev}>
-                                    &#10094;
+                            <div className="desktop-arrows desktop-show">
+                                <button className="arrow-btn mr-auto" onClick={handlePrev}>
+                                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                                 </button>
-                                <button className="carousel-btn carousel-btn--next" onClick={handleNext}>
-                                    &#10095;
+                                <button className="arrow-btn ml-auto" onClick={handleNext}>
+                                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                                 </button>
-                            </>
+                            </div>
+                        )}
+
+                        {validImages.length > 1 && (
+                            <div className="mobile-pagination mobile-show">
+                                {validImages.map((_, i) => (
+                                    <span key={i} className={`dot ${i === currentIndex ? 'active' : ''}`} onClick={() => setCurrentIndex(i)} />
+                                ))}
+                            </div>
                         )}
                     </div>
-                    {/* Miniaturas de la galería */}
-                    <div className="ropa-media__thumbnails">
-                        {validImages.map((img, index) => (
-                            <img 
-                                key={index} 
-                                src={img} 
-                                alt={`${nombre} vista ${index + 1}`} 
-                                className={currentIndex === index ? "active" : ""}
-                                onClick={() => setCurrentIndex(index)}
-                                style={{ cursor: "pointer" }}
-                            />
-                        ))}
-                    </div>
-                </div>
-
-                {/* COLUMNA DERECHA: INFORMACIÓN Y ACCIONES */}
-                <div className="ropa-info">
                     
-                    {/* HEADER INFO */}
-                    <div className="ropa-info__header">
-                        <h1 className="ropa-info__title">{nombre}</h1>
-                        <h2 className="ropa-info__price">{precio}</h2>
-                        <p className="ropa-info__installments">3 CUOTAS SIN INTERÉS</p>
-                        <p className="ropa-info__shipping">Envío calculado en la compra</p>
+                    {validImages.length > 1 && (
+                        <div className="thumbnail-list desktop-show">
+                            {validImages.map((img, i) => (
+                                <button 
+                                    key={i} 
+                                    className={`thumb-btn ${i === currentIndex ? 'active' : ''}`} 
+                                    onClick={() => setCurrentIndex(i)}
+                                >
+                                    <img src={img} alt={`${nombre} view ${i+1}`} />
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* LADO DERECHO: DETALLES */}
+                <div className="info-details">
+                    <div className="details-header">
+                        <span className="categoria-label">{categoria || "Novedad"}</span>
+                        <h1 className="product-title">{nombre}</h1>
+                        <div className="price-container">
+                            <span className="current-price">{precio}</span>
+                            <span className="original-price">${(parseFloat(precio.replace("$", "").replace(".", "").replace(",", ".")) * 1.3).toLocaleString("es-AR")}</span>
+                        </div>
                     </div>
 
-                    <hr className="ropa-info__divider" />
+                    <div className="product-description">
+                        <p>{descripcion || "Explora un estilo minimalista con este producto diseñado para brindar la máxima comodidad y elegancia en tu día a día."}</p>
+                    </div>
 
-                    {/* DETALLES Y ADVERTENCIAS */}
-                    <div className="ropa-info__details">
-                        <p className="ropa-info__warning">
-                            <strong>ATENCIÓN:</strong> Chequear la tabla de talle porque las medidas pueden variar inclusive en un mismo producto.
+                    <div className="options-section">
+                        <div className="option-group">
+                            <div className="option-header">
+                                <span className="option-title">Talle</span>
+                                <span className="size-guide">Guía de talles</span>
+                            </div>
+                            <div className="size-selector">
+                                {tallas && tallas.length > 0 ? (
+                                    tallas.map(t => (
+                                        <button 
+                                            key={t} 
+                                            className={`size-btn ${selectedSize === t ? 'active' : ''}`}
+                                            onClick={() => setSelectedSize(t)}
+                                        >
+                                            {t}
+                                        </button>
+                                    ))
+                                ) : (
+                                    <button className="size-btn active">Único</button>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="option-group quantity-group desktop-show-block">
+                            <span className="option-title" style={{marginBottom: "12px", display: "block"}}>Cantidad</span>
+                            <div className="qty-selector">
+                                <button className="qty-btn" onClick={() => setQuantity(Math.max(1, quantity - 1))}>−</button>
+                                <span className="qty-val">{quantity}</span>
+                                <button className="qty-btn" onClick={() => setQuantity(quantity + 1)}>+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="action-section">
+                        <button className="add-to-cart-btn" onClick={handleAddToCart} disabled={adding}>
+                            <span>{adding ? "Agregando..." : "Agregar al carrito"}</span>
+                            <span className="mobile-show inline-price">{precio}</span>
+                        </button>
+                        <p className="shipping-info">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+                            Envíos y devoluciones gratuitas a todo el país
                         </p>
-
-                        <div className="ropa-info__model">
-                            <p>🏷 CATEGORÍA: {categoria || "General"}</p>
-                            <p>🎨 COLOR: {color || "Variado"}</p>
-                            <p>📏 TALLES: {Array.isArray(tallas) && tallas.length > 0 ? tallas.join(", ") : "Único"}</p>
-                        </div>
-
-                        {/* TALLES CON ESTILO DE BOTONES CIRCULARES */}
-                        <div className="ropa-info__sizes">
-                            <p>Talles disponibles:</p>
-                            <div className="ropa-info__sizes-list">
-                                {Array.isArray(tallas) && tallas.length > 0
-                                    ? tallas.map(t => <button key={t} className="size-btn">{t}</button>)
-                                    : <button className="size-btn active">Único</button>
-                                }
-                            </div>
-                        </div>
-
-                        {/* SELECTOR DE CANTIDAD */}
-                        <div className="ropa-info__quantity">
-                            <p>Cantidad:</p>
-                            <div className="quantity-controls">
-                                <button className="quantity-btn">-</button>
-                                <span className="quantity-number">1</span>
-                                <button className="quantity-btn">+</button>
-                            </div>
-                        </div>
-
-                        {/* BOTONES DE COMPRA */}
-                        <div className="ropa-info__actions">
-                            <button className="btn-primary">AGREGAR AL CARRITO</button>
-                            {/* TODO: Integración con Mercado Pago */}
-                            <button className="btn-secondary" id="mercado-pago-btn">COMPRAR AHORA (MercadoPago)</button>
-                        </div>
-
-                        {/* NOTA EXTRA */}
-                        <p className="ropa-info__note">
-                            Las medidas de la tabla NO son la medida exacta de cada prenda, es para que cada uno según su propia medida o prenda elija el talle que acuerde.
-                        </p>
-
-                        {/* REDES SOCIALES */}
-                        <div className="ropa-info__share">
-                            <span>Compartir</span>
-                            <div className="share-icons">
-                                {/* Puedes cambiar estas letras por etiquetas <img> o íconos SVG reales */}
-                                <span>f</span> 
-                                <span>p</span> 
-                                <span>t</span> 
-                                <span>✉</span>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
-
-            {/* DESCRIPCIÓN FINAL ABAJO DE TODO */}
-            <div className="ropa-description-footer">
-                <p>{descripcion}</p>
-            </div>
-
         </div>
     );
 }

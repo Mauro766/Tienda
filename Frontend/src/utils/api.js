@@ -1,18 +1,12 @@
 // utils/api.js
 
-import { getToken } from "./auth";
+export const getAuthHeaders = () => ({
+  "Content-Type": "application/json",
+});
 
-export const getAuthHeaders = () => {
-  const token = getToken();
+export const getAuthHeadersOnly = () => ({});
 
-  return {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-};
-
-export const getAuthHeadersOnly = () => {
-  const token = getToken();
-
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
+export const withCredentials = (options = {}) => ({
+  ...options,
+  credentials: options.credentials || "include",
+});

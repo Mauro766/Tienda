@@ -1,94 +1,149 @@
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Trash2, EyeOff, Loader2, AlertCircle, Package, Search, AlertTriangle } from "lucide-react";
 import { getProductosAdmin, desactivarProducto, eliminarProducto } from "../../services/RopaService";
 
-function EliminarProducto({ token }) {
-    const [productos, setProductos] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+function EliminarProducto() {
+  const [productos, setProductos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [confirming, setConfirming] = useState({ id: null, type: null });
 
-    useEffect(() => {
-        const fetchProductos = async () => {
-            try {
-                const data = await getProductosAdmin();
-                setProductos(data.filter(p => p.activo !== false));
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchProductos();
-    }, []);
-
-    const handleDesactivar = async (id) => {
-        if (!token) {
-            setError('Falta token de admin. Ingresalo en el panel o iniciá sesión');
-            return;
-        }
-
-        if (window.confirm('¿Estás seguro de que quieres ocultar este producto? Se podrá reactivar después.')) {
-            try {
-                await desactivarProducto(id);
-                setProductos(productos.filter((p) => p.id !== id));
-                setError(null);
-            } catch (err) {
-                setError(err.message || 'Error al ocultar producto');
-            }
-        }
+  useEffect(() => {
+    const fetchProductos = async () => {
+      try {
+        const data = await getProductosAdmin();
+        const productosData = Array.isArray(data) ? data : data?.content || [];
+        setProductos(productosData.filter((p) => p.activo !== false));
+      } catch (err) {
+        setError(err.message || "Error al cargar productos");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const handleEliminar = async (id) => {
-        if (!token) {
-            setError('Falta token de admin. Ingresalo en el panel o iniciá sesión');
-            return;
-        }
+    fetchProductos();
+  }, []);
 
-        if (window.confirm('¿Estás seguro de que quieres eliminar definitivamente este producto? Esta acción no se puede deshacer.')) {
-            try {
-                await eliminarProducto(id);
-                setProductos(productos.filter((p) => p.id !== id));
-                setError(null);
-            } catch (err) {
-                setError(err.message || 'Error al eliminar producto');
-            }
-        }
-    };
+  const handleDesactivar = async (id) => {
+    try {
+      await desactivarProducto(id);
+      setProductos((prev) => prev.filter((p) => p.id !== id));
+      setConfirming({ id: null, type: null });
+    } catch (err) {
+      setError(err.message || "Error al ocultar producto");
+    }
+  };
 
-    if (loading) return <p>Cargando productos...</p>;
-    if (error) return <p>Error: {error}</p>;
+  const handleEliminar = async (id) => {
+    try {
+      await eliminarProducto(id);
+      setProductos((prev) => prev.filter((p) => p.id !== id));
+      setConfirming({ id: null, type: null });
+    } catch (err) {
+      setError(err.message || "Error al eliminar producto");
+    }
+  };
 
+  const filtered = productos.filter((p) => (p.nombre || "").toLowerCase().includes(searchTerm.toLowerCase()));
+
+  if (loading) {
     return (
-        <div className="eliminar-producto">
-            <h2>Eliminar Producto</h2>
-            {productos.length === 0 ? (
-                <p>No hay productos para mostrar</p>
-            ) : (
-                <div className="productos-lista">
-                    {productos.map((p) => (
-                        <div key={p.id} className="producto-item">
-                            <span>{p.nombre} - {p.descripcion}</span>
-                            <div className="botones-accion">
-                                <button
-                                    onClick={() => handleDesactivar(p.id)}
-                                    className="btn-ocultar"
-                                    style={{ backgroundColor: 'yellow', color: 'black', border: '2px solid black', padding: '10px', fontSize: '16px' }}
-                                >
-                                    🟡 Ocultar
-                                </button>
-                                <button
-                                    onClick={() => handleEliminar(p.id)}
-                                    className="btn-eliminar"
-                                    style={{ backgroundColor: 'red', color: 'white', border: '2px solid black', padding: '10px', fontSize: '16px' }}
-                                >
-                                    🔴 Eliminar Definitivamente
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
+      <div className="admin-view">
+        <div className="admin-empty">
+          <Loader2 className="spin-icon" size={28} />
+          <p>Analizando inventario...</p>
         </div>
+      </div>
     );
+  }
+
+  return (
+    <section className="admin-view admin-delete-view">
+      <header className="admin-view-header">
+        <div>
+          <h2 className="admin-view-title">Zona de bajas</h2>
+          <p className="admin-view-desc">Oculta o elimina definitivamente productos del sistema.</p>
+        </div>
+      </header>
+
+      <div className="admin-alert" style={{ background: "#fffbeb", borderColor: "#fcd34d", color: "#92400e", marginBottom: "14px" }}>
+        <AlertTriangle size={18} />
+        <span>La eliminacion definitiva no se puede deshacer.</span>
+      </div>
+
+      <div className="admin-search">
+        <Search size={18} />
+        <input type="text" placeholder="Filtrar por nombre" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+      </div>
+
+      {error && (
+        <div className="admin-alert admin-alert-error" style={{ marginBottom: "14px" }}>
+          <AlertCircle size={18} />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {filtered.length === 0 ? (
+        <div className="admin-empty">
+          <Package size={38} />
+          <p>No hay productos disponibles para dar de baja.</p>
+        </div>
+      ) : (
+        <div className="admin-list">
+          <AnimatePresence>
+            {filtered.map((p) => (
+              <motion.article key={p.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }} className="admin-list-item">
+                <div className="admin-list-left">
+                  <img
+                    className="admin-list-thumb"
+                    src={
+                      p.imagenesUrl?.[0]
+                        ? p.imagenesUrl[0].startsWith("http")
+                          ? p.imagenesUrl[0]
+                          : `http://localhost:8081${p.imagenesUrl[0]}`
+                        : "/Campera.jpg"
+                    }
+                    alt={p.nombre}
+                  />
+                  <div>
+                    <h3 className="admin-list-title">{p.nombre}</h3>
+                    <p className="admin-list-meta">{p.descripcion || "Sin descripcion"}</p>
+                  </div>
+                </div>
+
+                <div className="admin-actions">
+                  {confirming.id === p.id ? (
+                    <>
+                      <button
+                        onClick={() => (confirming.type === "hide" ? handleDesactivar(p.id) : handleEliminar(p.id))}
+                        className={`admin-btn ${confirming.type === "hide" ? "admin-btn-primary" : "admin-btn-danger"}`}
+                      >
+                        Si, confirmar
+                      </button>
+                      <button onClick={() => setConfirming({ id: null, type: null })} className="admin-btn admin-btn-neutral">
+                        Cancelar
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => setConfirming({ id: p.id, type: "hide" })} className="admin-btn admin-btn-primary">
+                        <EyeOff size={16} /> Ocultar
+                      </button>
+                      <button onClick={() => setConfirming({ id: p.id, type: "delete" })} className="admin-btn admin-btn-danger">
+                        <Trash2 size={16} /> Eliminar
+                      </button>
+                    </>
+                  )}
+                </div>
+              </motion.article>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+    </section>
+  );
 }
 
 export default EliminarProducto;

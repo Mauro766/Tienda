@@ -1,20 +1,17 @@
 import { useEffect, useState } from "react";
+import { AlertCircle, Eye } from "lucide-react";
 import { getProductosAdmin, activarProducto } from "../../services/RopaService";
 import ProductCard from "../../components/ProductCard";
 
-function RopaOculta({ token }) {
+function RopaOculta() {
   const [productosOcultos, setProductosOcultos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const handleActivar = async (id) => {
-    if (!token) {
-      setError('Falta token de admin. Ingresalo en el panel o iniciá sesión');
-      return;
-    }
     try {
       await activarProducto(id);
-      setProductosOcultos(productosOcultos.filter((p) => p.id !== id));
+      setProductosOcultos((prev) => prev.filter((p) => p.id !== id));
       setError(null);
     } catch (err) {
       setError(err.message || "Error al reactivar producto");
@@ -25,11 +22,8 @@ function RopaOculta({ token }) {
     const fetchProductos = async () => {
       try {
         const data = await getProductosAdmin();
-
-        const ocultos = data.filter(
-          (p) => p.activo === false
-        );
-
+        const productosData = Array.isArray(data) ? data : data?.content || [];
+        const ocultos = productosData.filter((p) => p.activo === false);
         setProductosOcultos(ocultos);
       } catch (err) {
         setError(err.message || "No se pudo cargar productos ocultos");
@@ -41,32 +35,50 @@ function RopaOculta({ token }) {
     fetchProductos();
   }, []);
 
-  if (loading) return <p>Cargando productos ocultos...</p>;
+  if (loading) {
+    return (
+      <div className="admin-view">
+        <div className="admin-empty">
+          <p>Cargando productos ocultos...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="ropa-oculta">
-      <h2>Ropa Oculta</h2>
+    <section className="admin-view ropa-oculta">
+      <header className="admin-view-header">
+        <div>
+          <h2 className="admin-view-title">Productos ocultos</h2>
+          <p className="admin-view-desc">Aqui puedes reactivar productos deshabilitados.</p>
+        </div>
+        <span className="admin-chip">{productosOcultos.length} ocultos</span>
+      </header>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && (
+        <div className="admin-alert admin-alert-error" style={{ marginBottom: "12px" }}>
+          <AlertCircle size={18} />
+          <span>{error}</span>
+        </div>
+      )}
 
       <div className="productos-grid">
         {productosOcultos.length > 0 ? (
           productosOcultos.map((p) => (
-            <div key={p.id} className="producto-oculto-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '10px', paddingBottom: '20px' }}>
+            <div key={p.id} className="producto-oculto-wrapper">
               <ProductCard {...p} />
-              <button 
-                onClick={() => handleActivar(p.id)}
-                style={{ backgroundColor: 'green', color: 'white', border: '2px solid black', padding: '10px', fontSize: '16px', cursor: 'pointer', width: '100%', borderRadius: '5px' }}
-              >
-                🟢 Reactivar Producto
+              <button className="producto-oculto-reactivar" onClick={() => handleActivar(p.id)}>
+                <Eye size={16} /> Reactivar producto
               </button>
             </div>
           ))
         ) : (
-          <p>No hay productos ocultos.</p>
+          <div className="admin-empty">
+            <p>No hay productos ocultos.</p>
+          </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }
 

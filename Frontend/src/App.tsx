@@ -6,6 +6,9 @@ import RopaInfo from "./pages/RopaInfo";
 import Busqueda from "./pages/Busqueda";
 import Error from "./pages/Error404";
 import Admin from "./pages/Admin/AdminPanel";
+import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
+import DatosPedidos from "./pages/Pedido/Datos";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -21,7 +24,8 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(_error: Error): ErrorBoundaryState {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    void error;
     return { hasError: true };
   }
 
@@ -46,8 +50,25 @@ function App() {
           <Route path="/RopaInfo/:id" element={<RopaInfo />} />
           <Route path="/busqueda" element={<Busqueda />} />
           <Route path="/error" element={<Error />} />
+          <Route
+            path="/checkout"
+            element={
+              <ProtectedRoute requireCheckoutEntry>
+                <DatosPedidos />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requiredRole="ROLE_ADMIN">
+                <Admin/>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/login" element={<Login />} />
           <Route path="*" element={<Error />} />
-          <Route path="/admin" element={<Admin />} />
         </Routes>
       </BrowserRouter>
     </ErrorBoundary>

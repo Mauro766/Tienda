@@ -193,13 +193,17 @@
 
 @media (max-width: 640px) {
   .search-page {
-    padding: 105px 1rem 44px;
+    padding: 105px 0.5rem 44px; /* Menos padding lateral */
     margin-top: -45px;
+  }
+
+  .search-content {
+      padding: 0.5rem; /* Menos padding interno */
   }
 
   .search-content-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 0.5rem;
   }
-
 }

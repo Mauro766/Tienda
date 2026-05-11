@@ -1,7 +1,3 @@
-// services/authService.js
-
-import { setToken, removeToken } from "../utils/auth";
-
 const API_URL = "http://localhost:8081/auth";
 
 export const login = async (username, password) => {
@@ -10,22 +6,21 @@ export const login = async (username, password) => {
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: JSON.stringify({ username, password }),
   });
 
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || "Error al iniciar sesión");
+    throw new Error(errorData.message || "Error al iniciar sesion");
   }
 
-  const data = await res.json();
-
-  // 🔥 guardás el token
-  setToken(data.token);
-
-  return data;
+  return res.json();
 };
 
-export const logout = () => {
-  removeToken();
+export const logout = async () => {
+  await fetch(`${API_URL}/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
 };

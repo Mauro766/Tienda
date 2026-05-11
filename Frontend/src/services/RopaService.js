@@ -1,7 +1,7 @@
-import { getToken } from "../utils/auth";
 import { getAuthHeadersOnly } from "../utils/api";
 
 const API_URL = "http://localhost:8081/ropa";
+const PEDIDO_API_URL = "http://localhost:8081/pedido";
 
 export const crearProducto = async (ropa, imagenes) => {
   const formData = new FormData();
@@ -12,10 +12,13 @@ export const crearProducto = async (ropa, imagenes) => {
   );
 
   if (imagenes && imagenes.length > 0) {
-    imagenes.forEach(img => {
+  imagenes.forEach(img => {
+    // Solo append si es un archivo (File o Blob)
+    if (img instanceof File || img instanceof Blob) {
       formData.append("imagenes", img);
-    });
-  }
+    }
+  });
+}
 
   const res = await fetch(API_URL, {
     method: "POST",
@@ -56,10 +59,15 @@ export const getProductoById = async (id) => {
   return res.json();
 };
 
-export const actualizarProducto = async (id, producto, imagen) => {
+export const actualizarProducto = async (id, producto, imagenes) => {
   const formData = new FormData();
   formData.append("ropa", new Blob([JSON.stringify(producto)], { type: "application/json" }));
-  if (imagen) formData.append("imagen", imagen);
+  
+  if (imagenes && imagenes.length > 0) {
+    imagenes.forEach(img => {
+      formData.append("imagenes", img);
+    });
+  }
 
   const res = await fetch(`${API_URL}/${id}`, {
     method: "PUT",
@@ -123,4 +131,36 @@ export const activarProducto = async (id) => {
   }
 
   return res;
+};
+
+// 🔍 BUSQUEDA POR NOMBRE (Solo activos)
+export const buscarProductos = async (nombre) => {
+  const res = await fetch(`${API_URL}/buscar?nombre=${encodeURIComponent(nombre)}`);
+  if (!res.ok) throw new Error("Error en la búsqueda");
+  const data = await res.json();
+  return data.content || data; // Manejar respuesta de Pageable
+};
+
+// 🎭 FILTRADO AVANZADO (Solo activos)
+export const filtrarProductos = async (params) => {
+  const queryParams = new URLSearchParams();
+  if (params.nombre) queryParams.append("nombre", params.nombre);
+  if (params.categoria) queryParams.append("categoria", params.categoria);
+  if (params.precioMin) queryParams.append("precioMin", params.precioMin);
+  if (params.precioMax) queryParams.append("precioMax", params.precioMax);
+  if (params.color) queryParams.append("color", params.color);
+  if (params.talla) queryParams.append("talla", params.talla);
+
+  const res = await fetch(`${API_URL}/filtrar?${queryParams.toString()}`);
+  if (!res.ok) throw new Error("Error en el filtrado");
+  const data = await res.json();
+  return data.content || data;
+};
+
+export const getProductosMasVendidos = async (limite = 3) => {
+  const res = await fetch(`${PEDIDO_API_URL}/mas-vendidos?limite=${limite}`);
+  if (!res.ok) {
+    throw new Error("Error obteniendo productos mas vendidos");
+  }
+  return res.json();
 };

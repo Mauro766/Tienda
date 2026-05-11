@@ -11,5 +11,6 @@ import com.example.prueba.entity.*;
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
      Optional<Usuario> findByUsername(String username);
+     Optional<Usuario> findByCorreoElectronico(String correoElectronico);
 
 }

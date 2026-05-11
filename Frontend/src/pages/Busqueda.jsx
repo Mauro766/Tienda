@@ -1,27 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ProductCard from "../components/ProductCard";
+import { filtrarProductos } from "../services/RopaService";
 import "../styles/busqueda.css";
 
-const PRODUCTOS = [
-  { id: 1, nombre: "Remera Essential", categoria: "Remeras", precio: 25990, talles: ["S", "M", "L"], color: "Negro", img: "/Campera.jpg" },
-  { id: 2, nombre: "Jean Relax Fit", categoria: "Pantalones", precio: 48990, talles: ["M", "L", "XL"], color: "Azul", img: "/Campera.jpg" },
-  { id: 3, nombre: "Zapatilla Urban Move", categoria: "Calzado", precio: 73990, talles: ["40", "41", "42"], color: "Blanco", img: "/Campera.jpg" },
-  { id: 4, nombre: "Buzo Soft Club", categoria: "Buzos", precio: 56990, talles: ["S", "M", "L"], color: "Gris", img: "/Campera.jpg" },
-  { id: 5, nombre: "Campera North Wind", categoria: "Camperas", precio: 89990, talles: ["M", "L", "XL"], color: "Verde", img: "/Campera.jpg" },
-  { id: 6, nombre: "Remera Logo Front", categoria: "Remeras", precio: 29990, talles: ["S", "M", "L", "XL"], color: "Blanco", img: "/Campera.jpg" },
-  { id: 7, nombre: "Pantalon Cargo Street", categoria: "Pantalones", precio: 62990, talles: ["M", "L", "XL"], color: "Negro", img: "/Campera.jpg" },
-  { id: 8, nombre: "Bota Trail Pro", categoria: "Calzado", precio: 82990, talles: ["41", "42", "43"], color: "Marron", img: "/Campera.jpg" }
-];
-
-const CATEGORIAS = ["Remeras", "Pantalones", "Calzado", "Buzos", "Camperas"];
+const CATEGORIAS = ["REMERAS", "PANTALONES", "CALZADO", "BUZOS", "CAMPERAS"];
 const TALLES = ["S", "M", "L", "XL", "40", "41", "42", "43"];
 const COLORES = ["Negro", "Blanco", "Azul", "Verde", "Gris", "Marron"];
 const PRECIO_RANGOS = [
   { id: "0-35000", label: "Hasta $35.000", min: 0, max: 35000 },
   { id: "35001-65000", label: "$35.001 - $65.000", min: 35001, max: 65000 },
-  { id: "65001-999999", label: "Mas de $65.000", min: 65001, max: Number.POSITIVE_INFINITY }
+  { id: "65001-999999", label: "Mas de $65.000", min: 65001, max: 1000000 }
 ];
 
 const COLOR_HEX = {
@@ -33,63 +24,61 @@ const COLOR_HEX = {
   Marron: "#9c6644"
 };
 
-function toggleValue(value, values, setter) {
-  const exists = values.includes(value);
-  if (exists) {
-    setter(values.filter((current) => current !== value));
-    return;
-  }
-  setter([...values, value]);
-}
-
 function Busqueda() {
+  const location = useLocation();
+  const [productos, setProductos] = useState([]);
   const [query, setQuery] = useState("");
-  const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState([]);
-  const [precioSeleccionado, setPrecioSeleccionado] = useState("");
-  const [tallesSeleccionados, setTallesSeleccionados] = useState([]);
-  const [coloresSeleccionados, setColoresSeleccionados] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [categoria, setCategoria] = useState("");
+  const [precioId, setPrecioId] = useState("");
+  const [talle, setTalle] = useState("");
+  const [color, setColor] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // 🔄 Obtener query inicial desde la URL (?q=...)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const q = params.get("q");
+    if (q) setQuery(q);
+  }, [location.search]);
+
+  const fetchFiltered = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const rango = PRECIO_RANGOS.find(r => r.id === precioId);
+      const params = {
+        nombre: query,
+        categoria: categoria || null,
+        precioMin: rango ? rango.min : null,
+        precioMax: rango ? rango.max : null,
+        color: color || null,
+        talla: talle || null
+      };
+      
+      const data = await filtrarProductos(params);
+      setProductos(data);
+    } catch (err) {
+      setError("Error al cargar productos.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [query, categoria, precioId, talle, color]);
 
   useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => setLoading(false), 220);
+    const timer = setTimeout(() => {
+      fetchFiltered();
+    }, 300); // Debounce para no saturar al escribir
     return () => clearTimeout(timer);
-  }, [query, categoriasSeleccionadas, precioSeleccionado, tallesSeleccionados, coloresSeleccionados]);
-
-  const productosFiltrados = useMemo(() => {
-    const texto = query.trim().toLowerCase();
-    const precioActivo = PRECIO_RANGOS.find((rango) => rango.id === precioSeleccionado);
-
-    return PRODUCTOS.filter((producto) => {
-      const coincideTexto =
-        !texto ||
-        producto.nombre.toLowerCase().includes(texto) ||
-        producto.categoria.toLowerCase().includes(texto);
-
-      const coincideCategoria =
-        categoriasSeleccionadas.length === 0 || categoriasSeleccionadas.includes(producto.categoria);
-
-      const coincideTalle =
-        tallesSeleccionados.length === 0 ||
-        tallesSeleccionados.some((talle) => producto.talles.includes(talle));
-
-      const coincideColor =
-        coloresSeleccionados.length === 0 || coloresSeleccionados.includes(producto.color);
-
-      const coincidePrecio =
-        !precioActivo ||
-        (producto.precio >= precioActivo.min && producto.precio <= precioActivo.max);
-
-      return coincideTexto && coincideCategoria && coincideTalle && coincideColor && coincidePrecio;
-    });
-  }, [query, categoriasSeleccionadas, precioSeleccionado, tallesSeleccionados, coloresSeleccionados]);
+  }, [fetchFiltered]);
 
   const limpiarFiltros = () => {
     setQuery("");
-    setCategoriasSeleccionadas([]);
-    setPrecioSeleccionado("");
-    setTallesSeleccionados([]);
-    setColoresSeleccionados([]);
+    setCategoria("");
+    setPrecioId("");
+    setTalle("");
+    setColor("");
   };
 
   return (
@@ -100,7 +89,7 @@ function Busqueda() {
           <input
             type="search"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar productos..."
             className="search-input"
             aria-label="Buscar productos"
@@ -110,18 +99,15 @@ function Busqueda() {
         <div className="search-layout">
           <aside className="search-sidebar">
             <div className="filter-group">
-              <h3>Categorias</h3>
+              <h3>Categorías</h3>
               <div className="chip-group">
-                {CATEGORIAS.map((categoria) => (
+                {CATEGORIAS.map((cat) => (
                   <button
-                    type="button"
-                    key={categoria}
-                    className={`chip-button ${categoriasSeleccionadas.includes(categoria) ? "active" : ""}`}
-                    onClick={() =>
-                      toggleValue(categoria, categoriasSeleccionadas, setCategoriasSeleccionadas)
-                    }
+                    key={cat}
+                    className={`chip-button ${categoria === cat ? "active" : ""}`}
+                    onClick={() => setCategoria(cat === categoria ? "" : cat)}
                   >
-                    {categoria}
+                    {cat}
                   </button>
                 ))}
               </div>
@@ -132,12 +118,9 @@ function Busqueda() {
               <div className="chip-group">
                 {PRECIO_RANGOS.map((rango) => (
                   <button
-                    type="button"
                     key={rango.id}
-                    className={`chip-button ${precioSeleccionado === rango.id ? "active" : ""}`}
-                    onClick={() =>
-                      setPrecioSeleccionado((actual) => (actual === rango.id ? "" : rango.id))
-                    }
+                    className={`chip-button ${precioId === rango.id ? "active" : ""}`}
+                    onClick={() => setPrecioId(rango.id === precioId ? "" : rango.id)}
                   >
                     {rango.label}
                   </button>
@@ -148,14 +131,13 @@ function Busqueda() {
             <div className="filter-group">
               <h3>Talle</h3>
               <div className="chip-group">
-                {TALLES.map((talle) => (
+                {TALLES.map((t) => (
                   <button
-                    type="button"
-                    key={talle}
-                    className={`chip-button ${tallesSeleccionados.includes(talle) ? "active" : ""}`}
-                    onClick={() => toggleValue(talle, tallesSeleccionados, setTallesSeleccionados)}
+                    key={t}
+                    className={`chip-button ${talle === t ? "active" : ""}`}
+                    onClick={() => setTalle(t === talle ? "" : t)}
                   >
-                    {talle}
+                    {t}
                   </button>
                 ))}
               </div>
@@ -164,15 +146,14 @@ function Busqueda() {
             <div className="filter-group">
               <h3>Color</h3>
               <div className="chip-group">
-                {COLORES.map((color) => (
+                {COLORES.map((c) => (
                   <button
-                    type="button"
-                    key={color}
-                    className={`chip-button color-chip ${coloresSeleccionados.includes(color) ? "active" : ""}`}
-                    onClick={() => toggleValue(color, coloresSeleccionados, setColoresSeleccionados)}
+                    key={c}
+                    className={`chip-button color-chip ${color === c ? "active" : ""}`}
+                    onClick={() => setColor(c === color ? "" : c)}
                   >
-                    <span className="color-dot" style={{ backgroundColor: COLOR_HEX[color] }} />
-                    {color}
+                    <span className="color-dot" style={{ backgroundColor: COLOR_HEX[c] }} />
+                    {c}
                   </button>
                 ))}
               </div>
@@ -181,30 +162,31 @@ function Busqueda() {
 
           <section className="search-content">
             <div className="search-content-header">
-              <p>{productosFiltrados.length} productos encontrados</p>
+              <p>{productos.length} productos encontrados</p>
               <button type="button" onClick={limpiarFiltros} className="clear-filters">
                 Limpiar filtros
               </button>
             </div>
 
             <div className="product-grid">
-              {loading &&
+              {loading ? (
                 Array.from({ length: 6 }).map((_, index) => (
                   <div key={`skeleton-${index}`} className="product-card skeleton" />
-                ))}
-
-              {!loading &&
-                productosFiltrados.map((producto) => (
+                ))
+              ) : (
+                productos.map((producto) => (
                   <ProductCard key={producto.id} {...producto} />
-                ))}
+                ))
+              )}
             </div>
 
-            {!loading && productosFiltrados.length === 0 && (
+            {!loading && productos.length === 0 && (
               <div className="empty-state">
                 <h3>Sin resultados</h3>
-                <p>Proba con otro termino o quitando algunos filtros.</p>
+                <p>Probá con otro término o quitando algunos filtros.</p>
               </div>
             )}
+            {error && <p className="error-message">{error}</p>}
           </section>
         </div>
       </main>

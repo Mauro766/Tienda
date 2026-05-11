@@ -14,7 +14,6 @@ import java.nio.file.Paths;
 public class ImagenController {
 
     private final Path carpetaUploads = Paths.get("src/main/resources/static/uploads");
-
     @GetMapping("/{nombreImagen}")
     public ResponseEntity<Resource> verImagen(@PathVariable String nombreImagen) {
 

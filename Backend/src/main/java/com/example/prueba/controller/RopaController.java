@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,7 +40,7 @@ public class RopaController {
     }
 
     // 🔹 Crear ropa (POST)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping(consumes = "multipart/form-data")
     public RopaDTO crear(
             @Valid @RequestPart("ropa") RopaCreateDTO dto,
@@ -71,6 +72,8 @@ public class RopaController {
             @RequestParam(required = false) String categoria,
             @RequestParam(required = false) Double precioMin,
             @RequestParam(required = false) Double precioMax,
+            @RequestParam(required = false) String color,
+            @RequestParam(required = false) String talla,
             Pageable pageable) {
 
         return ropaService.filtrar(
@@ -78,11 +81,13 @@ public class RopaController {
                 categoria,
                 precioMin,
                 precioMax,
+                color,
+                talla,
                 pageable);
     }
 
     // Lista todos sin importar si est activo o no solo para admin
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/admin")
     public List<RopaDTO> listarTodos() {
         return ropaService.listarTodos();
@@ -95,31 +100,32 @@ public class RopaController {
     }
 
     // 🔹 Actualizar (PUT)
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public RopaDTO actualizar(
             @PathVariable Long id,
-            @Valid @RequestBody RopaUpdateDTO dto) {
+            @Valid @RequestPart("ropa") RopaUpdateDTO dto,
+            @RequestPart(value = "imagenes", required = false) List<MultipartFile> imagenes) throws Exception {
 
-        return ropaService.actualizar(id, dto);
+        return ropaService.actualizar(id, dto, imagenes);
     }
 
     // 🔹 desactivar ropa
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping("/desactivar/{id}")
     public void desactivar(@PathVariable Long id) {
         ropaService.desactivar(id);
     }
 
     // 🔹 activar ropa
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping("/reactivar/{id}")
     public void activar(@PathVariable Long id) {
         ropaService.activar(id);
     }
 
     // Borrar el producto definitivamente
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Long id) {
         ropaService.eliminar(id);

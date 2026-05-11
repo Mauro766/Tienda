@@ -15,12 +15,13 @@ public class JwtService {
 
     private final String SECRET_KEY = "clave_super_secreta_muy_larga_para_jwt_seguridad_2026";
 
-    // 🔥 ahora recibe el rol
-    public String generarToken(String username, String role) {
+    // 🔥 ahora recibe el rol e ID
+    public String generarToken(String username, String role, Long id) {
 
         return Jwts.builder()
                 .setSubject(username)
                 .claim("role", role) // ✅ agregamos el rol
+                .claim("id", id)     // ✅ agregamos el ID
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))

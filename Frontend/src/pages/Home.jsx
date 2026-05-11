@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Header from "../components/Header";
+import { Link } from "react-router-dom";
 import Hero from "../components/Hero";
 import ProductSection from "../components/ProductSection";
 import Footer from "../components/Footer";
@@ -58,11 +59,11 @@ function Home() {
         </section>
 
         <section className="home-categories" aria-label="Categorias destacadas">
-          <a href="/busqueda" className="category-pill">Remeras</a>
-          <a href="/busqueda" className="category-pill">Pantalones</a>
-          <a href="/busqueda" className="category-pill">Calzado</a>
-          <a href="/busqueda" className="category-pill">Buzos</a>
-          <a href="/busqueda" className="category-pill">Camperas</a>
+          <Link viewTransition to="/busqueda" className="category-pill">Remeras</Link>
+          <Link viewTransition to="/busqueda" className="category-pill">Pantalones</Link>
+          <Link viewTransition to="/busqueda" className="category-pill">Calzado</Link>
+          <Link viewTransition to="/busqueda" className="category-pill">Buzos</Link>
+          <Link viewTransition to="/busqueda" className="category-pill">Camperas</Link>
         </section>
 
         <ProductSection

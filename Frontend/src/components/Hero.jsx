@@ -21,11 +21,6 @@ function Hero() {
           </a>
         </div>
 
-        <div className="hero-badges">
-          <span>Envios a todo el pais</span>
-          <span>3 cuotas sin interes</span>
-          <span>Cambios faciles</span>
-        </div>
       </div>
 
       <div className="what">

@@ -1,14 +1,12 @@
 package com.example.prueba.controller;
 
+import com.example.prueba.dto.UsuarioDTO;
+import com.example.prueba.entity.Usuario;
+import com.example.prueba.servicio.UsuarioService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.Authentication;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import com.example.prueba.entity.*;
-import com.example.prueba.servicio.*;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -20,51 +18,41 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-     // 🔓 Registro público
+    @PreAuthorize("permitAll()")
     @PostMapping("/auth/register")
-    public Usuario registrar(@RequestBody Usuario usuario) {
-        return usuarioService.registrarUsuario(usuario);
+    public UsuarioDTO registrar(@RequestBody Usuario usuario) {
+        Usuario usuarioCreado = usuarioService.registrarUsuario(usuario);
+        return usuarioService.toDTO(usuarioCreado);
     }
 
-    // 🔒 Solo ADMIN
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin/usuarios")
-    public Usuario crearAdmin(@RequestBody Usuario usuario) {
-        return usuarioService.crearAdmin(usuario);
+    public UsuarioDTO crearAdmin(@RequestBody Usuario usuario) {
+        Usuario adminCreado = usuarioService.crearAdmin(usuario);
+        return usuarioService.toDTO(adminCreado);
     }
-    // 🔹 Listar usuarios
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public List<Usuario> listarUsuarios() {
-        return usuarioService.listarUsuarios();
+    public List<UsuarioDTO> listarUsuarios() {
+        return usuarioService.listarUsuariosDTO();
     }
 
-    // 🔹 Buscar por username
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/buscar/{username}")
-    public Usuario buscarPorUsername(@PathVariable String username) {
-        return usuarioService.buscarPorUsername(username);
+    public UsuarioDTO buscarPorUsername(@PathVariable String username) {
+        return usuarioService.buscarDTOPorUsername(username);
     }
 
-    // 🔹 Desactivar usuario
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/desactivar/{id}")
     public void desactivar(@PathVariable Long id) {
         usuarioService.desactivarUsuario(id);
     }
 
-    // 🔹 Activar usuario
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/activar/{id}")
     public void activar(@PathVariable Long id) {
         usuarioService.activarUsuario(id);
     }
-
-    // Usuario Auntenticado
-    @GetMapping("/me")
-    public Map<String, Object> usuarioActual(Authentication authentication) {
-
-        Map<String, Object> datos = new HashMap<>();
-
-        datos.put("usuario", authentication.getName());
-        datos.put("roles", authentication.getAuthorities());
-
-        return datos;
-    }
-
 }

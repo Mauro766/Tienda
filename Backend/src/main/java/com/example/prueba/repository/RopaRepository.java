@@ -41,17 +41,22 @@ public interface RopaRepository extends JpaRepository<Ropa, Long> {
 
     @Query("""
         SELECT r FROM Ropa r
+        LEFT JOIN r.tallas t
         WHERE r.activo = true
         AND (:nombre IS NULL OR LOWER(r.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')))
         AND (:categoria IS NULL OR r.categoria = :categoria)
         AND (:precioMin IS NULL OR r.precio >= :precioMin)
         AND (:precioMax IS NULL OR r.precio <= :precioMax)
+        AND (:color IS NULL OR LOWER(r.color) = LOWER(:color))
+        AND (:talla IS NULL OR t = :talla)
     """)
     Page<Ropa> filtrar(
             @Param("nombre") String nombre,
             @Param("categoria") String categoria,
             @Param("precioMin") Double precioMin,
             @Param("precioMax") Double precioMax,
+            @Param("color") String color,
+            @Param("talla") String talla,
             Pageable pageable
     );
 

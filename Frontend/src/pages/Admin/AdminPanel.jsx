@@ -5,7 +5,6 @@ function AdminPanel(){
     return(
         <>
         <Panel/>
-        
         </>
     );
 

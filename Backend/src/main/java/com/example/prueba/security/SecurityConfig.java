@@ -39,17 +39,19 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/imagenes/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/logout").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/auth/me").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/usuarios/admin/usuarios").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/ropa").hasRole("ADMIN")
+                        .requestMatchers("/api/usuarios/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/ropa").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.GET, "/ropa").permitAll()
                         .requestMatchers(HttpMethod.GET, "/ropa/buscar").permitAll()
                         .requestMatchers(HttpMethod.GET, "/ropa/filtrar").permitAll()
                         .requestMatchers(HttpMethod.GET, "/ropa/id/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/ropa/admin").hasRole("ADMIN")
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/ropa/admin").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/pedido/mas-vendidos").permitAll()
+                        .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -62,8 +64,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5173",
                 "http://127.0.0.1:5174"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        config.setExposedHeaders(List.of("Authorization"));
+        config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

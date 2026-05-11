@@ -1,348 +1,465 @@
 /* =========================================
-   CONTENEDOR PRINCIPAL
+   ROPA INFO - MINIMALIST DESIGN
 ========================================= */
-.producto-container {
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+.ropa-info-modern {
     max-width: 1200px;
-    margin: 0 auto;
-    margin-top: 113px;
-    padding: 28px;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin: 100px auto 60px;
+    padding: 0 40px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     color: #111;
-    border: 1px solid #e3e5e8;
-    border-radius: 24px;
-    background: rgba(255, 255, 255, 0.84);
-    backdrop-filter: blur(5px);
-    box-shadow: 0 16px 30px rgba(18, 22, 27, 0.08);
 }
 
-.producto-layout {
+/* Helpers */
+.desktop-show { display: flex; }
+.desktop-show-block { display: block; }
+.mobile-show { display: none; }
+.mr-auto { margin-right: auto; }
+.ml-auto { margin-left: auto; }
+
+.info-layout {
     display: flex;
-    gap: 40px; /* Espacio entre la foto y la info */
+    gap: 80px;
     align-items: flex-start;
 }
 
 /* =========================================
-   COLUMNA IZQUIERDA: GALERÍA DE IMÁGENES
+   LEFT SIDE (MEDIA)
 ========================================= */
-.ropa-media {
-    flex: 1; /* Ocupa el 50% del ancho */
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.ropa-media__principal {
-    position: relative;
-    overflow: hidden;
-    border-radius: 14px;
-}
-
-.ropa-media__principal img {
-    width: 100%;
-    aspect-ratio: 3 / 4; /* Fuerza todas las imágenes a tener exactamente la misma proporción */
-    object-fit: cover; /* Centra y recorta manteniendo la calidad */
-    background-color: #eef0f3; /* Fondo grisecito simulando estudio */
-    border-radius: 14px;
-    display: block;
-}
-
-.fade-in-image {
-    animation: fadeEffect 0.4s ease-in-out;
-}
-
-@keyframes fadeEffect {
-    from {
-        opacity: 0.4;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-.carousel-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.7);
-    color: #333;
-    border: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    font-size: 1.2rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: background 0.2s, color 0.2s;
-}
-
-.carousel-btn:hover {
-    background: #fff;
-    color: #000;
-}
-
-.carousel-btn--prev {
-    left: 10px;
-}
-
-.carousel-btn--next {
-    right: 10px;
-}
-
-.ropa-media__thumbnails {
-    display: flex;
-    gap: 10px;
-}
-
-.ropa-media__thumbnails img {
-    width: 60px;
-    height: 80px;
-    object-fit: cover;
-    cursor: pointer;
-    border: 1px solid transparent;
-    border-radius: 10px;
-}
-
-.ropa-media__thumbnails img.active {
-    border: 1px solid #000; /* Borde para la miniatura seleccionada */
-}
-
-/* =========================================
-   COLUMNA DERECHA: INFORMACIÓN
-========================================= */
-.ropa-info {
-    flex: 1; /* Ocupa el otro 50% */
+.info-media {
+    flex: 1.2;
     display: flex;
     flex-direction: column;
     gap: 20px;
+    position: sticky;
+    top: 100px;
 }
 
-.ropa-info__header {
+.image-showcase {
+    position: relative;
+    width: 100%;
+    max-height: 70vh;
+    background-color: #f6f6f6;
+    border-radius: 16px;
+    overflow: hidden;
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    justify-content: center;
 }
 
-.ropa-info__title {
-    font-size: 1.5rem;
-    font-weight: 400;
-    text-transform: uppercase;
-    margin: 0;
+.main-product-img {
+    width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    animation: fadeInMinimal 0.4s ease-out;
 }
 
-.ropa-info__price {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin: 0;
+@keyframes fadeInMinimal {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
 }
 
-.ropa-info__installments {
-    color: #d0021b; /* Rojo de las cuotas */
-    font-weight: bold;
-    font-size: 0.85rem;
-    margin: 0;
+.desktop-arrows {
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    pointer-events: none;
 }
 
-.ropa-info__shipping {
-    font-size: 0.85rem;
-    text-decoration: underline;
-    margin: 0;
-}
-
-.ropa-info__divider {
+.arrow-btn {
+    pointer-events: auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
     border: none;
-    border-top: 1px solid #eee;
-    margin: 10px 0;
-}
-
-/* Textos de advertencia y modelo */
-.ropa-info__details {
     display: flex;
-    flex-direction: column;
-    gap: 15px;
-    font-size: 0.9rem;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #111;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
-.ropa-info__warning {
-    margin: 0;
-    line-height: 1.4;
+.arrow-btn:hover {
+    background: #fff;
+    transform: scale(1.05);
 }
 
-.ropa-info__model p {
-    margin: 4px 0;
+.thumbnail-list {
+    display: flex;
+    gap: 12px;
+}
+
+.thumb-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    padding: 0;
+    cursor: pointer;
+    background: #f6f6f6;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    opacity: 0.6;
+}
+
+.thumb-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumb-btn:hover {
+    opacity: 0.9;
+}
+
+.thumb-btn.active {
+    border-color: #111;
+    opacity: 1;
 }
 
 /* =========================================
-   SELECTORES DE TALLE Y CANTIDAD
+   RIGHT SIDE (INFO)
 ========================================= */
-.ropa-info__sizes {
-    margin-top: 10px;
-}
-
-.ropa-info__sizes p {
-    margin-bottom: 10px;
-}
-
-.ropa-info__sizes-list {
+.info-details {
+    flex: 1;
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    padding-top: 10px;
+}
+
+.details-header {
+    margin-bottom: 24px;
+}
+
+.categoria-label {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    color: #777;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.product-title {
+    font-size: 2.5rem;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+    color: #111;
+}
+
+.price-container {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.current-price {
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.original-price {
+    font-size: 1rem;
+    color: #999;
+    text-decoration: line-through;
+}
+
+.product-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #555;
+    margin-bottom: 40px;
+}
+
+/* Options */
+.options-section {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    margin-bottom: 40px;
+}
+
+.option-group {}
+
+.option-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+}
+
+.option-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    color: #111;
+    display: inline-block;
+}
+
+.size-guide {
+    font-size: 0.85rem;
+    color: #777;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.size-selector {
+    display: flex;
     flex-wrap: wrap;
+    gap: 12px;
 }
 
 .size-btn {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%; /* Hace el botón circular */
-    border: 1px solid #ccc;
-    background-color: transparent;
+    min-width: 56px;
+    height: 48px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #111;
     cursor: pointer;
-    font-size: 0.9rem;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
 }
 
 .size-btn:hover {
-    border-color: #666;
+    border-color: #111;
 }
 
 .size-btn.active {
-    border: 2px solid #000;
-    font-weight: bold;
+    background: #111;
+    color: #fff;
+    border-color: #111;
 }
 
-.ropa-info__quantity {
-    margin-top: 10px;
-}
-
-.quantity-controls {
-    display: flex;
+.qty-selector {
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    width: 120px;
-    border: 1px solid #ccc;
-    border-radius: 25px; /* Forma de pastilla */
-    padding: 5px 15px;
-    margin-top: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    height: 48px;
+    padding: 0 4px;
 }
 
-.quantity-btn {
-    background: none;
+.qty-btn {
+    width: 40px;
+    height: 100%;
+    background: transparent;
     border: none;
     font-size: 1.2rem;
-    cursor: pointer;
-}
-
-.quantity-number {
-    font-size: 1rem;
-}
-
-/* =========================================
-   BOTONES DE ACCIÓN (COMPRA)
-========================================= */
-.ropa-info__actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.btn-primary, .btn-secondary {
-    width: 100%;
-    padding: 15px;
-    border-radius: 30px; /* Bordes bien redondeados */
-    font-weight: bold;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: opacity 0.2s;
-}
-
-.btn-primary {
-    background-color: #000;
-    color: #fff;
-    border: none;
-}
-
-.btn-secondary {
-    background-color: #000;
-    color: #fff;
-    border: none;
-}
-
-.btn-primary:hover, .btn-secondary:hover {
-    opacity: 0.8;
-}
-
-/* =========================================
-   NOTAS, REDES Y FOOTER
-========================================= */
-.ropa-info__note {
-    font-size: 0.8rem;
     color: #555;
-    line-height: 1.4;
-    margin-top: 10px;
+    cursor: pointer;
 }
 
-.ropa-info__share {
+.qty-btn:hover { color: #111; }
+
+.qty-val {
+    width: 32px;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* Actions */
+.action-section {
+    margin-top: auto;
+}
+
+.add-to-cart-btn {
+    width: 100%;
+    height: 60px;
+    border-radius: 12px;
+    background: #111;
+    color: #fff;
+    border: none;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
-    gap: 15px;
-    margin-top: 20px;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+.add-to-cart-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    background: #000;
+}
+
+.add-to-cart-btn:disabled {
+    background: #666;
+    cursor: not-allowed;
+}
+
+.shipping-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 0.85rem;
-}
-
-.share-icons span {
-    color: #888;
-    cursor: pointer;
-
-}
-
-.ropa-description-footer {
-    margin-top: 60px;
-    text-align: center;
-    font-size: 0.85rem;
-    line-height: 1.5;
-    padding-top: 20px;
-
-}
-
-.card-section{
-    max-width: 1200px;
-    margin: 26px auto 0;
-    padding: 24px;
-    text-align: center;
-    border: 1px solid #e3e5e8;
-    border-radius: 24px;
-    background: rgba(255, 255, 255, 0.84);
-    backdrop-filter: blur(5px);
-    box-shadow: 0 16px 30px rgba(18, 22, 27, 0.08);
-}
-
-.card-section-destacados{
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-    width: 100%;
+    color: #777;
+    margin-top: 16px;
+    justify-content: center;
 }
 
 /* =========================================
-   RESPONSIVE (Para celulares)
+   RESPONSIVE (MOBILE)
 ========================================= */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
+    .ropa-info-modern {
+        padding: 0;
+        margin: 0;
+    }
 
-    .producto-container {
+    .desktop-show { display: none !important; }
+    .desktop-show-block { display: none !important; }
+    .mobile-show { display: flex; }
+    span.mobile-show { display: inline-block; margin-left: 8px; font-weight: 400; opacity: 0.8;}
 
-    margin-top: 80px;
+    .info-layout {
+        flex-direction: column;
+        gap: 0;
+    }
 
+    .info-media {
+        width: 100%;
+        position: static;
+        gap: 0;
+    }
+
+    .image-showcase {
+        border-radius: 0;
+        aspect-ratio: 3/4;
+        max-height: 60vh;
+        background-color: #f1f2f3;
+    }
+
+    .main-product-img {
+        object-fit: cover;
+    }
+
+    .mobile-nav {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        right: 20px;
+    }
+
+    .nav-icon-btn {
+        width: 44px;
+        height: 44px;
+        background: rgba(255,255,255,0.9);
+        backdrop-filter: blur(8px);
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        color: #111;
+        cursor: pointer;
+    }
+
+
+
+    .mobile-pagination {
+        position: absolute;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.15);
+        transition: all 0.3s;
+    }
+
+    .dot.active {
+        background: #111;
+        transform: scale(1.3);
+    }
+
+    .info-details {
+        padding: 24px 24px 140px;
+    }
+
+    .product-title {
+        font-size: 2rem;
+    }
+
+    .current-price {
+        font-size: 1.4rem;
+    }
+
+    /* Fixed Bottom Action Bar */
+    .action-section {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 16px 24px 24px;
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(0,0,0,0.05);
+        z-index: 100;
+        margin: 0;
+    }
+
+    .shipping-info {
+        display: none;
+    }
 }
 
-    .producto-layout {
-        flex-direction: column; /* Apila la info abajo de la foto */
-        gap: 20px;
+/* =========================================
+   SECCIÓN: MÁS VENDIDOS / DESTACADOS
+========================================= */
+.card-section {
+    max-width: 1200px;
+    margin: 60px auto;
+    padding: 0 40px;
+}
+
+@media (max-width: 900px) {
+    .card-section {
+        padding: 0 24px;
     }
-    
-    .ropa-media, .ropa-info {
-        width: 100%;
-    }
+}
+
+.card-section h2 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+    color: #111;
+}
+
+.card-section-destacados {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 24px;
+    width: 100%;
 }

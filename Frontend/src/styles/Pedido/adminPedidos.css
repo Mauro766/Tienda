@@ -1,0 +1,366 @@
+.admin-pedidos-view {
+  display: grid;
+  gap: 14px;
+}
+
+.pedidos-alert {
+  margin-bottom: 4px;
+}
+
+.pedidos-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.pedidos-list-panel {
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.pedidos-list-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pedidos-list-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.pedidos-list-header p {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 0.84rem;
+}
+
+.pedidos-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.pedidos-tab-btn {
+  border: 1px solid #d9e2ec;
+  background: #fff;
+  color: #334155;
+  border-radius: 999px;
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+}
+
+.pedidos-tab-btn:hover {
+  border-color: rgba(15, 118, 110, 0.35);
+}
+
+.pedidos-tab-btn.active {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #f8fafc;
+}
+
+.pedidos-search-wrap input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px 12px;
+}
+
+.pedidos-list {
+  display: grid;
+  gap: 10px;
+  max-height: 58vh;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.pedidos-list::-webkit-scrollbar {
+  width: 7px;
+}
+
+.pedidos-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.35);
+}
+
+.pedidos-empty-search {
+  padding: 20px 12px;
+}
+
+.pedido-list-item {
+  width: 100%;
+  border: 1px solid #d9e2ec;
+  border-radius: 14px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.pedido-list-item:hover {
+  border-color: rgba(15, 118, 110, 0.36);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.pedido-list-item.active {
+  border-color: rgba(15, 118, 110, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.35);
+  background: linear-gradient(180deg, rgba(240, 253, 250, 0.92), #ffffff);
+}
+
+.pedido-list-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pedido-list-top strong {
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pedido-list-email {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.84rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pedido-list-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 0.79rem;
+}
+
+.pedido-list-meta span:nth-child(2) {
+  flex: 1;
+}
+
+.pedido-list-meta strong {
+  color: var(--admin-ink);
+  font-size: 0.86rem;
+}
+
+.pedido-detail-panel {
+  padding: 18px;
+  display: grid;
+  gap: 16px;
+}
+
+.pedido-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pedido-detail-head h3 {
+  margin: 0;
+  font-size: 1.22rem;
+}
+
+.pedido-detail-head p {
+  margin: 7px 0 0;
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+.pedido-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pedido-detail-grid div {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px 12px;
+  display: grid;
+  gap: 5px;
+}
+
+.pedido-detail-grid span {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.pedido-detail-grid strong {
+  font-size: 0.92rem;
+  color: #0f172a;
+  word-break: break-word;
+}
+
+.pedido-detail-status-row {
+  display: grid;
+  gap: 7px;
+}
+
+.pedido-detail-status-row label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #334155;
+  font-weight: 700;
+}
+
+.pedido-products h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.pedido-products ul {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.pedido-product-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  padding: 11px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.pedido-product-item strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.pedido-product-item p {
+  margin: 3px 0 0;
+  color: #64748b;
+  font-size: 0.83rem;
+}
+
+.pedido-product-prices {
+  display: grid;
+  justify-items: end;
+  gap: 3px;
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.pedido-product-prices strong {
+  color: #0f172a;
+}
+
+.pedido-total-row {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+}
+
+.pedido-total-row span {
+  color: #334155;
+}
+
+.pedido-total-row strong {
+  font-size: 1.08rem;
+}
+
+.pedido-estado-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.estado-pendiente {
+  color: #92400e;
+  background: #fffbeb;
+  border-color: #fcd34d;
+}
+
+.estado-archivado {
+  color: #166534;
+  background: #ecfdf5;
+  border-color: #86efac;
+}
+
+.estado-enviado {
+  color: #0f766e;
+  background: #f0fdfa;
+  border-color: #5eead4;
+}
+
+.estado-cancelado {
+  color: #be123c;
+  background: #fff1f2;
+  border-color: #fda4af;
+}
+
+.estado-default {
+  color: #334155;
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+@media (max-width: 980px) {
+  .pedidos-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .pedidos-list {
+    max-height: 34vh;
+  }
+}
+
+@media (max-width: 640px) {
+  .pedido-detail-panel,
+  .pedidos-list-panel {
+    padding: 12px;
+  }
+
+  .pedido-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pedido-product-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pedido-product-prices {
+    justify-items: start;
+  }
+}
