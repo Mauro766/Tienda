@@ -60,6 +60,15 @@ Incluye autenticación segura, administración de productos y funcionalidades co
 - Soporte para carga de imágenes de productos
 - Almacenamiento configurado en el servidor
 
+### Despliegue en Vercel y Render
+
+- En Vercel, configurar `VITE_API_URL` con la URL HTTPS del servicio backend de Render.
+- En Render, configurar `FRONTEND_URL` con el origen exacto del frontend y `BACKEND_URL` con el origen HTTPS del backend. `FRONTEND_URL` se usa para los retornos de pago; `BACKEND_URL` queda disponible como configuración de URL.
+- Configurar `CORS_ALLOWED_ORIGINS` con el origen exacto de Vercel (sin rutas ni comodines). Para varios frontends, separar los orígenes con comas.
+- Configurar `APP_AUTH_COOKIE_SECURE=true` y `APP_AUTH_COOKIE_SAME_SITE=None` en Render. `SameSite=None` exige `Secure`; localmente se mantienen los valores predeterminados compatibles con HTTP.
+- La autenticación usa un JWT en cookie HttpOnly, no una sesión del servidor ni un token en `localStorage`. El navegador debe aceptar cookies de terceros para dominios Vercel/Render distintos. Si la política del navegador las bloquea, usar dominios propios del mismo sitio (por ejemplo, `tienda.example.com` y `api.example.com`); no guardar el JWT en almacenamiento accesible a JavaScript.
+- Render usa almacenamiento efímero salvo que se conecte un disco persistente. Montar un disco y apuntar `UPLOADS_DIR` a su ruta de montaje para conservar las imágenes subidas entre reinicios y despliegues.
+
 ---
 
 ## 💸 Integración con Mercado Pago y WebSockets (Novedad)

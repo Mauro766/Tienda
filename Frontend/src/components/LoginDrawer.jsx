@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "../styles/Login/IniciarSesion.css";
 import { registrarUsuario, loginUsuario } from "../services/UserService";
-import { setAuthUser, isAdmin } from "../utils/auth";
+import { isAdmin, refreshAuthUser } from "../utils/auth";
 import { useLocation, useNavigate } from "react-router-dom";
 import { sincronizarCarrito } from "../services/CarritoService";
 
@@ -35,8 +35,12 @@ function LoginDrawer() {
           password: formData.password,
         };
 
-        const user = await loginUsuario(loginData);
-        const authUser = setAuthUser(user);
+        await loginUsuario(loginData);
+        const authUser = await refreshAuthUser();
+
+        if (!authUser) {
+          throw new Error("El backend aceptó el login, pero no confirmó la sesión. Verifica las cookies del navegador.");
+        }
 
         await sincronizarCarrito();
         alert("Sesion iniciada con exito");

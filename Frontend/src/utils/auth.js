@@ -71,6 +71,7 @@ export const refreshAuthUser = async () => {
     return setAuthUser(data);
   } catch (error) {
     clearAuthUser();
+    console.error("No se pudo verificar la sesion con el backend:", error);
     return null;
   }
 };

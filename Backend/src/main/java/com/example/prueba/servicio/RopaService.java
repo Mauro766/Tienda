@@ -21,7 +21,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Service
 public class RopaService {
@@ -243,9 +242,7 @@ public class RopaService {
                 continue;
             }
 
-            Path rutaVieja = Paths.get(
-                    "src/main/resources/static/uploads",
-                    nombre);
+            Path rutaVieja = storageService.resolverArchivo(nombre);
 
             try {
                 Files.deleteIfExists(rutaVieja);
@@ -317,9 +314,7 @@ public class RopaService {
                     ? imgUrl.substring(URL_BASE.length())
                     : imgUrl;
 
-            Path ruta = Paths.get(
-                    "src/main/resources/static/uploads",
-                    nombreArchivo);
+            Path ruta = storageService.resolverArchivo(nombreArchivo);
 
             try {
                 Files.deleteIfExists(ruta);

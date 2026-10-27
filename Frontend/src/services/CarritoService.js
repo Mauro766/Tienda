@@ -1,14 +1,10 @@
-import { getUserFromToken, refreshAuthUser } from "../utils/auth";
+import { refreshAuthUser } from "../utils/auth";
 import { API_URL as BASE_URL } from "../config";
 
 const API_URL = `${BASE_URL}/carrito`;
 const LOCAL_STORAGE_KEY = "carrito_invitado";
 
-const getLoggedUser = async () => {
-    const cachedUser = getUserFromToken();
-    if (cachedUser) return cachedUser;
-    return refreshAuthUser();
-};
+const getLoggedUser = () => refreshAuthUser();
 
 /**
  * GESTION LOCAL (GUEST)
