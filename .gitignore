@@ -1,5 +1,4 @@
 # -------- Sensitive configuration --------
-Backend/src/main/resources/application.properties
 Backend/src/main/resources/application-local.properties
 Backend/src/main/resources/application-dev.properties
 Backend/src/main/resources/application-prod.properties
