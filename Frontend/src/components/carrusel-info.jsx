@@ -1,4 +1,4 @@
-import "../../styles/carruselInfo.css";
+import "../styles/carruselInfo.css";
 
 function CarruselInfo() {
     return(

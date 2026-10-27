@@ -1,9 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&family=Alfa+Slab+One&family=Anton&family=Luckiest+Guy&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
 :root {
     --bg-soft: #f8f8f8;
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&family=Alfa+Slab+One&family=Anton&family=Luckiest+Guy&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
 /* View Transitions config - Note: @view-transition is for MPAs. 
    React Router handles the API trigger in this SPA. */
