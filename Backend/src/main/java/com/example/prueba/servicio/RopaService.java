@@ -44,40 +44,61 @@ public class RopaService {
         this.storageService = storageService;
     }
 
-    // 🔹 Crear ropa
+    private void asignarTallas(Ropa ropa, List<String> tallas) {
+        ropa.getTallas().clear();
+
+        if (tallas != null) {
+            for (String talla : tallas) {
+                ropa.getTallas().add(new RopaTalla(talla, ropa));
+            }
+        }
+    }
+
+    private void asignarImagenes(Ropa ropa, List<String> imagenes) {
+        ropa.getImagenesUrl().clear();
+
+        if (imagenes != null) {
+            for (String imagen : imagenes) {
+                ropa.getImagenesUrl().add(new RopaImagen(imagen, ropa));
+            }
+        }
+    }
+
+    private void agregarPrefijoImagenes(RopaDTO dto) {
+        if (dto.getImagenesUrl() != null && !dto.getImagenesUrl().isEmpty()) {
+            dto.setImagenesUrl(
+                    dto.getImagenesUrl().stream()
+                            .map(img -> URL_BASE + img)
+                            .collect(Collectors.toList()));
+        }
+    }
+
+    // Crear ropa
     public RopaDTO crear(RopaCreateDTO dto, List<MultipartFile> imagenes) throws Exception {
 
         Ropa ropa = RopaMapper.toEntity(dto);
 
-        if (imagenes != null && !imagenes.isEmpty()) {
-            List<String> nombres = new ArrayList<>();
+        List<String> nombres = new ArrayList<>();
+
+        if (imagenes != null) {
             for (MultipartFile img : imagenes) {
-                if (!img.isEmpty()) {
-                    String nombreImagen = storageService.guardarArchivo(img);
-                    nombres.add(nombreImagen);
+                if (img != null && !img.isEmpty()) {
+                    nombres.add(storageService.guardarArchivo(img));
                 }
             }
-            ropa.setImagenesUrl(nombres);
-        } else {
-            ropa.setImagenesUrl(new ArrayList<>());
         }
+
+        asignarImagenes(ropa, nombres);
 
         Ropa guardada = ropaRepository.save(ropa);
 
         RopaDTO respuesta = RopaMapper.toDTO(guardada);
-
-        if (guardada.getImagenesUrl() != null && !guardada.getImagenesUrl().isEmpty()) {
-            respuesta.setImagenesUrl(
-                guardada.getImagenesUrl().stream()
-                        .map(img -> URL_BASE + img)
-                        .collect(Collectors.toList())
-            );
-        }
+        agregarPrefijoImagenes(respuesta);
 
         return respuesta;
     }
 
-    // 🔹 Listar todas
+    // Listar todas o buscar por nombre
     public Page<RopaDTO> listar(String nombre, Pageable pageable) {
 
         Page<RopaDTO> page;
@@ -92,38 +113,22 @@ public class RopaService {
                     .map(RopaMapper::toDTO);
         }
 
-        page.forEach(r -> {
-            if (r.getImagenesUrl() != null && !r.getImagenesUrl().isEmpty()) {
-                r.setImagenesUrl(
-                    r.getImagenesUrl().stream()
-                            .map(img -> URL_BASE + img)
-                            .collect(Collectors.toList())
-                );
-            }
-        });
-
+        page.forEach(this::agregarPrefijoImagenes);
         return page;
     }
 
+    // Buscar por nombre
     public Page<RopaDTO> buscarPorNombre(String nombre, Pageable pageable) {
 
         Page<RopaDTO> page = ropaRepository
                 .findByNombreContainingIgnoreCaseAndActivoTrue(nombre, pageable)
                 .map(RopaMapper::toDTO);
 
-        page.forEach(r -> {
-            if (r.getImagenesUrl() != null && !r.getImagenesUrl().isEmpty()) {
-                r.setImagenesUrl(
-                    r.getImagenesUrl().stream()
-                            .map(img -> URL_BASE + img)
-                            .collect(Collectors.toList())
-                );
-            }
-        });
-
+        page.forEach(this::agregarPrefijoImagenes);
         return page;
     }
 
+    // Listar todos los productos
     public List<RopaDTO> listarTodos() {
 
         List<RopaDTO> lista = ropaRepository.findAll()
@@ -131,19 +136,11 @@ public class RopaService {
                 .map(RopaMapper::toDTO)
                 .collect(Collectors.toList());
 
-        lista.forEach(r -> {
-            if (r.getImagenesUrl() != null && !r.getImagenesUrl().isEmpty()) {
-                r.setImagenesUrl(
-                    r.getImagenesUrl().stream()
-                            .map(img -> URL_BASE + img)
-                            .collect(Collectors.toList())
-                );
-            }
-        });
-
+        lista.forEach(this::agregarPrefijoImagenes);
         return lista;
     }
 
+    // Filtrar productos
     public Page<RopaDTO> filtrar(
             String nombre,
             String categoria,
@@ -157,21 +154,15 @@ public class RopaService {
                 .filtrar(nombre, categoria, precioMin, precioMax, color, talla, pageable)
                 .map(RopaMapper::toDTO);
 
-        page.forEach(r -> {
-            if (r.getImagenesUrl() != null && !r.getImagenesUrl().isEmpty()) {
-                r.setImagenesUrl(
-                    r.getImagenesUrl().stream()
-                            .map(img -> URL_BASE + img)
-                            .collect(Collectors.toList())
-                );
-            }
-        });
-
+        page.forEach(this::agregarPrefijoImagenes);
         return page;
     }
 
-    // 🔹 Actualizar
-    public RopaDTO actualizar(Long id, RopaUpdateDTO dto, List<MultipartFile> imagenes) throws Exception {
+    // Actualizar producto
+    public RopaDTO actualizar(
+            Long id,
+            RopaUpdateDTO dto,
+            List<MultipartFile> imagenes) throws Exception {
 
         Ropa ropa = ropaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Ropa no encontrada"));
@@ -182,126 +173,119 @@ public class RopaService {
         ropa.setStock(dto.getStock());
         ropa.setCategoria(dto.getCategoria());
         ropa.setMarca(dto.getMarca());
-        ropa.setTallas(dto.getTallas() != null ? dto.getTallas() : new ArrayList<>());
         ropa.setColor(dto.getColor());
+
+        if (dto.getTallas() != null) {
+            asignarTallas(ropa, dto.getTallas());
+        }
 
         if (dto.getActivo() != null) {
             ropa.setActivo(dto.getActivo());
         }
 
-        // Si se suben nuevas imagenes, reemplazamos las anteriores
+        // Reemplazar las imágenes solo si llegan archivos válidos.
         if (imagenes != null && !imagenes.isEmpty()) {
+
             List<String> nombres = new ArrayList<>();
+
             for (MultipartFile img : imagenes) {
-                if (!img.isEmpty()) {
-                    String nombreImagen = storageService.guardarArchivo(img);
-                    nombres.add(nombreImagen);
+                if (img != null && !img.isEmpty()) {
+                    nombres.add(storageService.guardarArchivo(img));
                 }
             }
+
             if (!nombres.isEmpty()) {
-                ropa.setImagenesUrl(nombres);
+                asignarImagenes(ropa, nombres);
             }
         }
 
         Ropa actualizada = ropaRepository.save(ropa);
 
         RopaDTO respuesta = RopaMapper.toDTO(actualizada);
-
-        if (actualizada.getImagenesUrl() != null && !actualizada.getImagenesUrl().isEmpty()) {
-            respuesta.setImagenesUrl(
-                actualizada.getImagenesUrl().stream()
-                        .map(img -> URL_BASE + img)
-                        .collect(Collectors.toList())
-            );
-        }
+        agregarPrefijoImagenes(respuesta);
 
         return respuesta;
     }
 
-    // Actualizar Imagenes (Reemplazar todas por las nuevas)
-    public RopaDTO actualizarImagen(Long id, List<MultipartFile> imagenes) throws Exception {
+    // Reemplazar todas las imágenes del producto
+    @Transactional
+    public RopaDTO actualizarImagen(
+            Long id,
+            List<MultipartFile> imagenes) throws Exception {
 
         Ropa ropa = ropaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Ropa no encontrada"));
 
-        // borrar imagenes viejas
-        if (ropa.getImagenesUrl() != null) {
-            for (String imgVieja : ropa.getImagenesUrl()) {
-                Path rutaVieja = Paths.get("src/main/resources/static/uploads", imgVieja);
-                try {
-                    Files.deleteIfExists(rutaVieja);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        // Guardar los nombres anteriores antes de reemplazar la relación.
+        List<String> imagenesViejas = ropa.getImagenesUrl() == null
+                ? new ArrayList<>()
+                : ropa.getImagenesUrl().stream()
+                        .map(RopaImagen::getImagenUrl)
+                        .collect(Collectors.toList());
 
-        // guardar nuevas imagenes
-        List<String> nuevas = new java.util.ArrayList<>();
+        // Guardar las imágenes nuevas.
+        List<String> nuevas = new ArrayList<>();
+
         if (imagenes != null) {
             for (MultipartFile img : imagenes) {
-                if (!img.isEmpty()) {
+                if (img != null && !img.isEmpty()) {
                     nuevas.add(storageService.guardarArchivo(img));
                 }
             }
         }
 
-        ropa.setImagenesUrl(nuevas);
+        asignarImagenes(ropa, nuevas);
+        Ropa actualizada = ropaRepository.saveAndFlush(ropa);
 
-        Ropa actualizada = ropaRepository.save(ropa);
+        // Eliminar los archivos antiguos solo si ya no están referenciados.
+        for (String nombre : imagenesViejas) {
+            if (nombre == null || nombre.isBlank() || nuevas.contains(nombre)) {
+                continue;
+            }
 
-        RopaDTO dto = RopaMapper.toDTO(actualizada);
+            Path rutaVieja = Paths.get(
+                    "src/main/resources/static/uploads",
+                    nombre);
 
-        if (actualizada.getImagenesUrl() != null && !actualizada.getImagenesUrl().isEmpty()) {
-            dto.setImagenesUrl(
-                actualizada.getImagenesUrl().stream()
-                        .map(img -> "http://localhost:8081/uploads/" + img)
-                        .collect(Collectors.toList())
-            );
+            try {
+                Files.deleteIfExists(rutaVieja);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
-        return dto;
+        RopaDTO respuesta = RopaMapper.toDTO(actualizada);
+        agregarPrefijoImagenes(respuesta);
+
+        return respuesta;
     }
 
-    // 🔹 Buscar por id
+    // Buscar producto por ID
     public RopaDTO buscarPorId(Long id) {
 
         Ropa ropa = ropaRepository.findByIdAndActivoTrue(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Ropa no encontrada"));
 
         RopaDTO dto = RopaMapper.toDTO(ropa);
-
-        if (ropa.getImagenesUrl() != null && !ropa.getImagenesUrl().isEmpty()) {
-            dto.setImagenesUrl(
-                ropa.getImagenesUrl().stream()
-                        .map(img -> URL_BASE + img)
-                        .collect(Collectors.toList())
-            );
-        }
+        agregarPrefijoImagenes(dto);
 
         return dto;
     }
 
+    // Filtrar por categoría
     public List<RopaDTO> filtrarPorCategoria(String categoria) {
 
-        List<RopaDTO> lista = ropaRepository.findByCategoriaAndActivoTrue(categoria)
+        List<RopaDTO> lista = ropaRepository
+                .findByCategoriaAndActivoTrue(categoria)
                 .stream()
                 .map(RopaMapper::toDTO)
                 .collect(Collectors.toList());
 
-        lista.forEach(r -> {
-            if (r.getImagenesUrl() != null && !r.getImagenesUrl().isEmpty()) {
-                r.setImagenesUrl(
-                    r.getImagenesUrl().stream()
-                            .map(img -> URL_BASE + img)
-                            .collect(Collectors.toList())
-                );
-            }
-        });
-
+        lista.forEach(this::agregarPrefijoImagenes);
         return lista;
     }
 
+    // Eliminar producto
     @Transactional
     public void eliminar(Long id) {
 
@@ -314,9 +298,12 @@ public class RopaService {
         }
 
         carritoItemRepository.deleteByProductoId(id);
-        List<String> imagenes = ropa.getImagenesUrl() != null
-                ? new ArrayList<>(ropa.getImagenesUrl())
-                : new ArrayList<>();
+
+        List<String> imagenes = ropa.getImagenesUrl() == null
+                ? new ArrayList<>()
+                : ropa.getImagenesUrl().stream()
+                        .map(RopaImagen::getImagenUrl)
+                        .collect(Collectors.toList());
 
         ropaRepository.delete(ropa);
         ropaRepository.flush();
@@ -325,10 +312,15 @@ public class RopaService {
             if (imgUrl == null || imgUrl.isBlank()) {
                 continue;
             }
+
             String nombreArchivo = imgUrl.startsWith(URL_BASE)
                     ? imgUrl.substring(URL_BASE.length())
                     : imgUrl;
-            Path ruta = Paths.get("src/main/resources/static/uploads", nombreArchivo);
+
+            Path ruta = Paths.get(
+                    "src/main/resources/static/uploads",
+                    nombreArchivo);
+
             try {
                 Files.deleteIfExists(ruta);
             } catch (IOException e) {
@@ -356,7 +348,8 @@ public class RopaService {
         int limiteFinal = limite > 0 ? limite : 3;
         Pageable pageable = PageRequest.of(0, limiteFinal);
 
-        Page<Ropa> page = ropaRepository.findByActivoTrueAndCantidadVentasGreaterThanEqualOrderByCantidadVentasDesc(5, pageable);
+        Page<Ropa> page = ropaRepository.findByActivoTrueAndCantidadVentasGreaterThanEqualOrderByCantidadVentasDesc(5,
+                pageable);
         List<RopaDTO> lista = page.stream()
                 .map(RopaMapper::toDTO)
                 .collect(Collectors.toList());
@@ -364,10 +357,9 @@ public class RopaService {
         lista.forEach(r -> {
             if (r.getImagenesUrl() != null && !r.getImagenesUrl().isEmpty()) {
                 r.setImagenesUrl(
-                    r.getImagenesUrl().stream()
-                            .map(img -> URL_BASE + img)
-                            .collect(Collectors.toList())
-                );
+                        r.getImagenesUrl().stream()
+                                .map(img -> URL_BASE + img)
+                                .collect(Collectors.toList()));
             }
         });
 

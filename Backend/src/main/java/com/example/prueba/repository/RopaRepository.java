@@ -42,7 +42,7 @@ public interface RopaRepository extends JpaRepository<Ropa, Long> {
             Pageable pageable);
 
     @Query("""
-        SELECT r FROM Ropa r
+        SELECT DISTINCT r FROM Ropa r
         LEFT JOIN r.tallas t
         WHERE r.activo = true
         AND (:nombre IS NULL OR LOWER(r.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')))
@@ -50,7 +50,7 @@ public interface RopaRepository extends JpaRepository<Ropa, Long> {
         AND (:precioMin IS NULL OR r.precio >= :precioMin)
         AND (:precioMax IS NULL OR r.precio <= :precioMax)
         AND (:color IS NULL OR LOWER(r.color) = LOWER(:color))
-        AND (:talla IS NULL OR t = :talla)
+        AND (:talla IS NULL OR t.talla = :talla)
     """)
     Page<Ropa> filtrar(
             @Param("nombre") String nombre,
