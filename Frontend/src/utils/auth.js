@@ -4,6 +4,7 @@ const AUTH_URL = `${API_URL}/auth`;
 const USER_STORAGE_KEY = "auth_user_profile";
 
 let cachedUser = null;
+let refreshInFlight = null;
 
 const normalizarUsuario = (user) => {
   if (!user || typeof user !== "object") return null;
@@ -55,25 +56,33 @@ export const getUserFromToken = () => {
   }
 };
 
-export const refreshAuthUser = async () => {
-  try {
-    const res = await fetch(`${AUTH_URL}/me`, {
-      method: "GET",
-      credentials: "include",
-    });
+export const refreshAuthUser = () => {
+  if (refreshInFlight) return refreshInFlight;
 
-    if (!res.ok) {
+  refreshInFlight = (async () => {
+    try {
+      const res = await fetch(`${AUTH_URL}/me`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        clearAuthUser();
+        return null;
+      }
+
+      const data = await res.json();
+      return setAuthUser(data);
+    } catch (error) {
       clearAuthUser();
+      console.error("No se pudo verificar la sesion con el backend:", error);
       return null;
+    } finally {
+      refreshInFlight = null;
     }
+  })();
 
-    const data = await res.json();
-    return setAuthUser(data);
-  } catch (error) {
-    clearAuthUser();
-    console.error("No se pudo verificar la sesion con el backend:", error);
-    return null;
-  }
+  return refreshInFlight;
 };
 
 export const logout = async () => {

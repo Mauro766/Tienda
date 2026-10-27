@@ -2,7 +2,10 @@ package com.example.prueba.security;
 
 import java.util.Date;
 import java.util.function.Function;
+import java.nio.charset.StandardCharsets;
 
+import javax.crypto.SecretKey;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -13,18 +16,25 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtService {
 
-    private final String SECRET_KEY = "clave_super_secreta_muy_larga_para_jwt_seguridad_2026";
+    private final SecretKey signingKey;
 
-    // 🔥 ahora recibe el rol e ID
+    public JwtService(@Value("${app.auth.jwt.secret:}") String secret) {
+        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        if (keyBytes.length < 32) {
+            throw new IllegalStateException("APP_AUTH_JWT_SECRET debe contener al menos 32 bytes");
+        }
+        this.signingKey = Keys.hmacShaKeyFor(keyBytes);
+    }
+
     public String generarToken(String username, String role, Long id) {
 
         return Jwts.builder()
                 .setSubject(username)
-                .claim("role", role) // ✅ agregamos el rol
-                .claim("id", id)     // ✅ agregamos el ID
+                .claim("role", role)
+                .claim("id", id)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000))
-                .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
+                .signWith(signingKey)
                 .compact();
     }
 
@@ -39,12 +49,12 @@ public class JwtService {
 
     public boolean validarToken(String token, UserDetails userDetails) {
         final String username = extraerUsername(token);
-        return (username.equals(userDetails.getUsername()) && !tokenExpirado(token));
+        return (username != null && username.equals(userDetails.getUsername()) && !tokenExpirado(token));
     }
 
     private Claims extraerTodosClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
+                .setSigningKey(signingKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

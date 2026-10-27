@@ -1,7 +1,20 @@
 package com.example.prueba.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -11,20 +24,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CsrfException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.security.web.access.AccessDeniedHandler;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @EnableMethodSecurity
 @Configuration
@@ -37,8 +43,16 @@ public class SecurityConfig {
     }
 
     @Bean
+    public FilterRegistrationBean<JwtFilter> jwtFilterServletRegistration(JwtFilter jwtFilter) {
+        FilterRegistrationBean<JwtFilter> registration = new FilterRegistrationBean<>(jwtFilter);
+        registration.setEnabled(false);
+        return registration;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
+            ObjectMapper objectMapper,
             @Value("${app.auth.cookie.secure:false}") boolean secureCookie,
             @Value("${app.auth.cookie.same-site:Lax}") String sameSitePolicy) throws Exception {
 
@@ -60,7 +74,18 @@ public class SecurityConfig {
                         .ignoringRequestMatchers("/ws/**"))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                        .authenticationEntryPoint((request, response, exception) -> writeSecurityError(
+                                response, objectMapper, HttpStatus.UNAUTHORIZED,
+                                "UNAUTHENTICATED", "Autenticacion requerida"))
+                        .accessDeniedHandler((request, response, exception) -> {
+                            boolean csrfFailure = exception instanceof CsrfException;
+                            writeSecurityError(
+                                    response,
+                                    objectMapper,
+                                    HttpStatus.FORBIDDEN,
+                                    csrfFailure ? "CSRF_INVALID" : "FORBIDDEN",
+                                    csrfFailure ? "Token CSRF invalido" : "Acceso denegado");
+                        }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/imagenes/**").permitAll()
@@ -87,6 +112,17 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    private void writeSecurityError(
+            HttpServletResponse response,
+            ObjectMapper objectMapper,
+            HttpStatus status,
+            String code,
+            String message) throws IOException {
+        response.setStatus(status.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        objectMapper.writeValue(response.getOutputStream(), Map.of("code", code, "message", message));
     }
 
     @Bean

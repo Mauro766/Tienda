@@ -14,7 +14,10 @@ export const login = async (username, password) => {
 
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || "Error al iniciar sesion");
+    const error = new Error(errorData.message || "Error al iniciar sesion");
+    error.code = errorData.code || `HTTP_${res.status}`;
+    error.status = res.status;
+    throw error;
   }
 
   return res.json();

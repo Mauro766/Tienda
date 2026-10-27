@@ -30,11 +30,11 @@ public class UsuarioDetailsService implements UserDetailsService {
                 .or(() -> usuarioRepository.findByCorreoElectronico(idNormalizado))
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        return new User(
-                usuario.getUsername(),
-                usuario.getPassword(),
-                List.of(new SimpleGrantedAuthority(usuario.getRol()))
-        );
+        return User.withUsername(usuario.getUsername())
+                .password(usuario.getPassword())
+                .authorities(List.of(new SimpleGrantedAuthority(usuario.getRol())))
+                .disabled(!Boolean.TRUE.equals(usuario.getActivo()))
+                .build();
     }
 
     private String normalizarLoginId(String loginId) {

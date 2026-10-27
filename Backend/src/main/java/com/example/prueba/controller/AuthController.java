@@ -55,18 +55,21 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        System.out.println(">>> LLEGÓ UNA PETICIÓN A /auth/login");
         String loginId = normalizarLoginId(request.getLoginId());
         String password = request.getPassword() == null ? "" : request.getPassword();
 
         if (loginId.isBlank() || password.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Debes enviar login y password"));
+            return ResponseEntity.badRequest().body(Map.of(
+                    "code", "INVALID_REQUEST",
+                    "message", "Debes enviar login y password"));
         }
 
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginId, password));
         } catch (AuthenticationException ex) {
-            return ResponseEntity.status(401).body(Map.of("message", "Credenciales invalidas"));
+            return ResponseEntity.status(401).body(Map.of(
+                    "code", "INVALID_CREDENTIALS",
+                    "message", "Credenciales invalidas"));
         }
 
         Usuario usuario = usuarioRepository.findByUsername(loginId)
@@ -114,7 +117,9 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<?> me(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).body(Map.of("message", "No autenticado"));
+            return ResponseEntity.status(401).body(Map.of(
+                    "code", "UNAUTHENTICATED",
+                    "message", "No autenticado"));
         }
 
         String username = authentication.getName();

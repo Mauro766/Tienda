@@ -6,6 +6,20 @@ const API_URL = `${BASE_URL}/api/usuarios`;
 // AUTH
 const AUTH_URL = `${BASE_URL}/auth`;
 
+const throwApiError = async (response, fallbackMessage) => {
+    let data = {};
+    try {
+        data = await response.json();
+    } catch {
+        // Keep a useful status even when a proxy or older backend returns no JSON body.
+    }
+
+    const error = new Error(data.message || fallbackMessage);
+    error.code = data.code || `HTTP_${response.status}`;
+    error.status = response.status;
+    throw error;
+};
+
 export const registrarUsuario = async (usuario) => {
     const res = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
@@ -16,7 +30,7 @@ export const registrarUsuario = async (usuario) => {
     });
 
     if (!res.ok) {
-        throw new Error("Error al registrar el usuario");
+        await throwApiError(res, "Error al registrar el usuario");
     }
 
     return res.json();
@@ -33,8 +47,7 @@ export const loginUsuario = async (usuario) => {
     });
 
     if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || "Error al iniciar sesion");
+        await throwApiError(res, "Error al iniciar sesion");
     }
 
     return res.json();
