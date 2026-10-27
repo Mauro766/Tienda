@@ -1,0 +1,72 @@
+.exito-pago-container {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.exito-pago-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 3rem 2.5rem;
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.exito-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto 1.5rem;
+  font-weight: bold;
+}
+
+.exito-icon.success {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.exito-icon.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.exito-icon.failure {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.exito-pago-card h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: #111;
+}
+
+.exito-pago-card p {
+  color: #6b7280;
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+
+.exito-pago-actions button {
+  background: #111;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.exito-pago-actions button:hover {
+  background: #333;
+}

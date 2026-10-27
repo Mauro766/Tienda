@@ -13,10 +13,12 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,12 +27,20 @@ import java.nio.file.Paths;
 public class RopaService {
 
     private final RopaRepository ropaRepository;
+    private final CarritoItemRepository carritoItemRepository;
+    private final PedidoItemRepository pedidoItemRepository;
     private final StorageService storageService;
 
     private final String URL_BASE = "/uploads/";
 
-    public RopaService(RopaRepository ropaRepository, StorageService storageService) {
+    public RopaService(
+            RopaRepository ropaRepository,
+            CarritoItemRepository carritoItemRepository,
+            PedidoItemRepository pedidoItemRepository,
+            StorageService storageService) {
         this.ropaRepository = ropaRepository;
+        this.carritoItemRepository = carritoItemRepository;
+        this.pedidoItemRepository = pedidoItemRepository;
         this.storageService = storageService;
     }
 
@@ -292,23 +302,39 @@ public class RopaService {
         return lista;
     }
 
+    @Transactional
     public void eliminar(Long id) {
 
         Ropa ropa = ropaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Ropa no encontrada"));
 
-        if (ropa.getImagenesUrl() != null) {
-            for (String imgUrl : ropa.getImagenesUrl()) {
-                Path ruta = Paths.get("src/main/resources/static/uploads", imgUrl);
-                try {
-                    Files.deleteIfExists(ruta);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+        if (pedidoItemRepository.existsByProductoId(id)) {
+            throw new IllegalStateException(
+                    "No se puede eliminar este producto porque ya forma parte de pedidos registrados. Puedes ocultarlo desde el panel admin.");
         }
 
-        ropaRepository.deleteById(id);
+        carritoItemRepository.deleteByProductoId(id);
+        List<String> imagenes = ropa.getImagenesUrl() != null
+                ? new ArrayList<>(ropa.getImagenesUrl())
+                : new ArrayList<>();
+
+        ropaRepository.delete(ropa);
+        ropaRepository.flush();
+
+        for (String imgUrl : imagenes) {
+            if (imgUrl == null || imgUrl.isBlank()) {
+                continue;
+            }
+            String nombreArchivo = imgUrl.startsWith(URL_BASE)
+                    ? imgUrl.substring(URL_BASE.length())
+                    : imgUrl;
+            Path ruta = Paths.get("src/main/resources/static/uploads", nombreArchivo);
+            try {
+                Files.deleteIfExists(ruta);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void desactivar(Long id) {
@@ -323,5 +349,28 @@ public class RopaService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Ropa no encontrada"));
         ropa.setActivo(true);
         ropaRepository.save(ropa);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RopaDTO> obtenerProductosMasVendidos(int limite) {
+        int limiteFinal = limite > 0 ? limite : 3;
+        Pageable pageable = PageRequest.of(0, limiteFinal);
+
+        Page<Ropa> page = ropaRepository.findByActivoTrueAndCantidadVentasGreaterThanEqualOrderByCantidadVentasDesc(5, pageable);
+        List<RopaDTO> lista = page.stream()
+                .map(RopaMapper::toDTO)
+                .collect(Collectors.toList());
+
+        lista.forEach(r -> {
+            if (r.getImagenesUrl() != null && !r.getImagenesUrl().isEmpty()) {
+                r.setImagenesUrl(
+                    r.getImagenesUrl().stream()
+                            .map(img -> URL_BASE + img)
+                            .collect(Collectors.toList())
+                );
+            }
+        });
+
+        return lista;
     }
 }

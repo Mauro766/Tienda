@@ -3,6 +3,7 @@ import { useLocation, Link, useNavigate } from "react-router-dom";
 import { logout, getUserFromToken, isAdmin, refreshAuthUser } from "../utils/auth";
 import { obtenerCarrito } from "../services/CarritoService";
 import PanelCarrito from "./panel-carrito";
+import "../styles/header.css";
 
 function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -126,7 +127,7 @@ function Header() {
       {/* ===== MOBILE TOP BAR ===== */}
       <div className="mobile-top-bar">
         <Link viewTransition to="/" className="mtb-logo-link">
-          <img className="mobile-top-logo" src="/logo.png" alt="Logo" />
+        <h3>DealPush|Muestra</h3>
         </Link>
 
         <div className="mobile-top-actions">
@@ -137,6 +138,20 @@ function Header() {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
             {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
           </button>
+           {user && isAdmin(user) && (
+              <Link viewTransition to="/admin" className="header-admin-link">Admin</Link>
+            )}
+
+            {user ? (
+              <button className="hdr-user-pill" onClick={handleLogout}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>{user.username}</span>
+              </button>
+            ) : (
+              <Link viewTransition to="/login" className="hdr-icon-btn" aria-label="Ingresar">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </Link>
+            )}
         </div>
       </div>
 
@@ -166,7 +181,7 @@ function Header() {
       <header className={`header ${scrolled || shopHover || searchOpen || forceVisibleHeader ? "scrolled" : ""}`}>
         <div className="principal">
           <div className="header-left">
-            <Link viewTransition to="/"><img className="header-right-logo" src="/logo.png" alt="Logo" /></Link>
+            <Link viewTransition to="/"><h3>DealPush|Muestra</h3></Link>
           </div>
 
           <nav className="header-center">
@@ -178,7 +193,7 @@ function Header() {
             >
               <a className="shop" href="#">Shop</a>
             </div>
-            <a href="#">Locales</a>
+            <a href="#">Local</a>
           </nav>
 
           <div className="header-right">

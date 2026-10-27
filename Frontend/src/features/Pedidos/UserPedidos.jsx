@@ -20,26 +20,36 @@ function UserPedido() {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError("");
-        setOk("");
 
-        if (!form.direccion|| !form.ciudad || !form.telefono) {
-            setError("Completa todos los campos");
-            return;
+    e.preventDefault();
+
+    setError("");
+    setOk("");
+
+    if (!form.direccion || !form.ciudad || !form.telefono) {
+        setError("Completa todos los campos");
+        return;
+    }
+
+    setLoading(true);
+
+    try {
+        const response = await checkout(form);
+
+        if (!response?.initPoint) {
+            throw new Error("No se pudo generar el link de pago");
         }
 
-        setLoading(true);
-        try {
-            await checkout(form);
-            setOk("Pedido realizado correctamente");
-            setForm(INITIAL_FORM);
-        } catch (err) {
-            setError(err.message || "Error al realizar el pedido");
-        } finally {
-            setLoading(false);
-        }
-    };
+        window.location.href = response.initPoint;
+
+    } catch (err) {
+        setError(err.message || "Error al realizar el pedido");
+
+    } finally {
+
+        setLoading(false);
+    }
+};
 
     return (
         <section className="checkout-page">

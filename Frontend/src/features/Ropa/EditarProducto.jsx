@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+
 import {
   Search,
   Edit3,
@@ -13,6 +13,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { getProductosAdmin, getProductoById, actualizarProducto } from "../../services/RopaService";
+import { getCategorias, crearCategoria } from "../../services/CategoriaService";
 
 function EditarProducto() {
   const [productos, setProductos] = useState([]);
@@ -32,6 +33,11 @@ function EditarProducto() {
   const [success, setSuccess] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const location = useLocation();
+
+  // Categorias
+  const [categorias, setCategorias] = useState([]);
+  const [showCatDropdown, setShowCatDropdown] = useState(false);
+  const [creatingCat, setCreatingCat] = useState(false);
 
   useEffect(() => {
     if (location.state?.productoId && !selectedProducto) {
@@ -53,6 +59,18 @@ function EditarProducto() {
     };
 
     fetchProductos();
+  }, []);
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const data = await getCategorias();
+        setCategorias(data || []);
+      } catch (err) {
+        console.error("Error cargando categorias", err);
+      }
+    };
+    fetchCats();
   }, []);
 
   const handleSelectProducto = async (id) => {
@@ -86,6 +104,30 @@ function EditarProducto() {
     }
   };
 
+  const handleCategoriaKeyDown = async (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const val = (formData.categoria || "").trim();
+      if (!val) return;
+
+      const existe = categorias.find((c) => c.nombre.toLowerCase() === val.toLowerCase());
+      if (!existe) {
+        setCreatingCat(true);
+        try {
+          const nueva = await crearCategoria(val);
+          setCategorias((prev) => [...prev, nueva]);
+          setFormData((prev) => ({ ...prev, categoria: nueva.nombre }));
+          setSuccess(`Categoria "${nueva.nombre}" guardada en la base de datos.`);
+        } catch (err) {
+          setError("No se pudo guardar la categoria en la base de datos.");
+        } finally {
+          setCreatingCat(false);
+        }
+      }
+      setShowCatDropdown(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -93,6 +135,19 @@ function EditarProducto() {
     setError(null);
 
     try {
+      const catVal = (formData.categoria || "").trim();
+      if (catVal) {
+        const existe = categorias.find((c) => c.nombre.toLowerCase() === catVal.toLowerCase());
+        if (!existe) {
+          try {
+            const nueva = await crearCategoria(catVal);
+            setCategorias((prev) => [...prev, nueva]);
+          } catch (errCat) {
+            console.error("No se pudo autoguardar la categoria", errCat);
+          }
+        }
+      }
+
       const tallasArray = formData.talles
         .split(",")
         .map((s) => s.trim())
@@ -156,9 +211,8 @@ function EditarProducto() {
         )}
       </header>
 
-      <AnimatePresence mode="wait">
-        {!selectedProducto ? (
-          <motion.div key="list" initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 14 }}>
+      {!selectedProducto ? (
+        <div>
             <div className="admin-search">
               <Search size={18} />
               <input
@@ -177,7 +231,7 @@ function EditarProducto() {
             ) : (
               <div className="admin-list">
                 {filteredProductos.map((p) => (
-                  <motion.article key={p.id} whileHover={{ y: -2 }} className="admin-list-item">
+                  <article key={p.id} className="admin-list-item">
                     <div className="admin-list-left">
                       <img
                         className="admin-list-thumb"
@@ -203,17 +257,14 @@ function EditarProducto() {
                         <Edit3 size={16} /> Editar
                       </button>
                     </div>
-                  </motion.article>
+                  </article>
                 ))}
               </div>
             )}
-          </motion.div>
+          </div>
         ) : (
-          <motion.form
+          <form
             key="form"
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.03 }}
             onSubmit={handleSubmit}
             className="admin-form"
           >
@@ -233,9 +284,63 @@ function EditarProducto() {
                 <input id="stock" type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
               </div>
 
+              {/* Selector y creador dinamico de categorias */}
               <div className="admin-field">
                 <label htmlFor="categoria">Categoria</label>
-                <input id="categoria" type="text" value={formData.categoria} onChange={(e) => setFormData({ ...formData, categoria: e.target.value })} />
+                <div className="admin-cat-container">
+                  <input
+                    id="categoria"
+                    type="text"
+                    placeholder="Remeras, Camperas (Enter para nueva)"
+                    value={formData.categoria}
+                    onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
+                    onFocus={() => setShowCatDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowCatDropdown(false), 180)}
+                    onKeyDown={handleCategoriaKeyDown}
+                    required
+                    disabled={creatingCat}
+                  />
+                  {showCatDropdown && (
+                    <ul className="admin-cat-dropdown">
+                      {categorias
+                        .filter((c) => c.nombre.toLowerCase().includes((formData.categoria || "").toLowerCase()))
+                        .map((c) => (
+                          <li
+                            key={c.id}
+                            className={`admin-cat-item ${formData.categoria.toLowerCase() === c.nombre.toLowerCase() ? "selected" : ""}`}
+                            onMouseDown={() => {
+                              setFormData((prev) => ({ ...prev, categoria: c.nombre }));
+                              setShowCatDropdown(false);
+                            }}
+                          >
+                            <span>{c.nombre}</span>
+                          </li>
+                        ))}
+                      {formData.categoria && !categorias.some((c) => c.nombre.toLowerCase() === formData.categoria.trim().toLowerCase()) && (
+                        <li
+                          className="admin-cat-item admin-cat-item-new"
+                          onMouseDown={async () => {
+                            const val = formData.categoria.trim();
+                            if (!val) return;
+                            setCreatingCat(true);
+                            try {
+                              const nueva = await crearCategoria(val);
+                              setCategorias((prev) => [...prev, nueva]);
+                              setFormData((prev) => ({ ...prev, categoria: nueva.nombre }));
+                              setSuccess(`Categoria "${nueva.nombre}" guardada en la base de datos.`);
+                            } catch (err) {
+                              setError("No se pudo guardar la categoria en la base de datos.");
+                            } finally {
+                              setCreatingCat(false);
+                            }
+                          }}
+                        >
+                          <span>+ Crear y elegir "{formData.categoria}"</span>
+                        </li>
+                      )}
+                    </ul>
+                  )}
+                </div>
               </div>
 
               <div className="admin-field">
@@ -286,28 +391,27 @@ function EditarProducto() {
               </div>
             </div>
 
-            <AnimatePresence>
+            <>
               {success && (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="admin-alert admin-alert-success">
+                <div className="admin-alert admin-alert-success">
                   <CheckCircle2 size={18} />
                   <span>{success}</span>
-                </motion.div>
+                </div>
               )}
               {error && (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="admin-alert admin-alert-error">
+                <div className="admin-alert admin-alert-error">
                   <AlertCircle size={18} />
                   <span>{error}</span>
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
+            </>
 
             <button type="submit" disabled={submitting} className="admin-submit">
               {submitting ? <Loader2 className="spin-icon" size={18} /> : <Save size={18} />}
               {submitting ? "Actualizando..." : "Guardar cambios"}
             </button>
-          </motion.form>
+          </form>
         )}
-      </AnimatePresence>
     </section>
   );
 }

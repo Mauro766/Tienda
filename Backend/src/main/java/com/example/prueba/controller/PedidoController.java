@@ -18,22 +18,30 @@ import com.example.prueba.dto.CrearPedidoDTO;
 import com.example.prueba.dto.RopaDTO;
 import com.example.prueba.entity.Pedido;
 import com.example.prueba.entity.Usuario;
+import com.example.prueba.servicio.MercadoPagoService;
+import java.util.HashMap;
+import java.util.Map;
 import com.example.prueba.servicio.PedidoService;
 import com.example.prueba.servicio.UsuarioService;
-
 import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/pedido")
 public class PedidoController {
+    private static final Logger logger = LoggerFactory.getLogger(PedidoController.class);
 
     private final PedidoService pedidoService;
     private final UsuarioService usuarioService;
+    private final MercadoPagoService mercadoPagoService;
 
-    public PedidoController(PedidoService pedidoService, UsuarioService usuarioService) {
+    public PedidoController(PedidoService pedidoService, UsuarioService usuarioService,
+            MercadoPagoService mercadoPagoService) {
         this.pedidoService = pedidoService;
         this.usuarioService = usuarioService;
+        this.mercadoPagoService = mercadoPagoService;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -47,7 +55,7 @@ public class PedidoController {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/checkout")
-    public Pedido checkout(
+    public Map<String, Object> checkout(
             @Valid @RequestBody CrearPedidoDTO dto,
             Authentication authentication) {
 
@@ -56,7 +64,21 @@ public class PedidoController {
         Usuario usuario = usuarioService.buscarPorUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        return pedidoService.crearPedidoDesdeCarrito(usuario.getId(), dto);
+        Pedido pedido = pedidoService.crearPedidoDesdeCarrito(usuario.getId(), dto);
+        String initPoint = null;
+        if (pedido.getItems() != null && !pedido.getItems().isEmpty()) {
+            try {
+                initPoint = mercadoPagoService.crearPreferencia(pedido);
+            } catch (com.mercadopago.exceptions.MPException | com.mercadopago.exceptions.MPApiException e) {
+                logger.error("No se pudo crear la preferencia de pago para el pedido {}", pedido.getId(), e);
+                throw new RuntimeException("Error al crear preferencia de pago", e);
+            }
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("pedidoId", pedido.getId());
+        response.put("initPoint", initPoint);
+        return response;
     }
 
     @PreAuthorize("isAuthenticated()")

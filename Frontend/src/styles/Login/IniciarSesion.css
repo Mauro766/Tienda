@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
 
 :root {
-  --primary-color: #4A90E2;
+  --primary-color: #000000;
   --secondary-color: #6A11CB;
   --accent-color: #FF5E62;
   --text-color: #333;
@@ -26,7 +26,7 @@ body {
   display: flex;
   min-height: 100vh;
   width: 100%;
-  margin-top: 90px;
+
 }
 
 /* Right Side - Form */

@@ -13,6 +13,13 @@ function RopaInfoPage() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+        });
+    }, [id]);
+
+    useEffect(() => {
         const fetchProduct = async () => {
             if (!id) return;
             try {

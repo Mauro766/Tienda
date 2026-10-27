@@ -130,4 +130,10 @@ public class RopaController {
     public void eliminar(@PathVariable Long id) {
         ropaService.eliminar(id);
     }
+
+    @GetMapping("/mas-vendidos")
+    public List<RopaDTO> obtenerMasVendidos(
+            @RequestParam(defaultValue = "3") int limite) {
+        return ropaService.obtenerProductosMasVendidos(limite);
+    }
 }

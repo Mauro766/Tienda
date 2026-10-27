@@ -19,6 +19,7 @@ function ProductCard({
 }) {
   const finalHref = detailHref ? detailHref : id ? `/RopaInfo/${id}` : "/RopaInfo";
   const finalAddHref = `/admin`;
+  const imageTransitionName = id ? `producto-imagen-${id}` : undefined;
 
   const coverImage = Array.isArray(imagenesUrl) && imagenesUrl.length > 0 ? imagenesUrl[0] : null;
 
@@ -63,7 +64,14 @@ function ProductCard({
         </span>
       )}
       <div className="product-image">
-        <img src={imageSrc} alt={nombre} style={{ opacity: activo === false ? 0.6 : 1 }} />
+        <img
+          src={imageSrc}
+          alt={nombre}
+          style={{
+            opacity: activo === false ? 0.6 : 1,
+            viewTransitionName: imageTransitionName,
+          }}
+        />
       </div>
       <div className="product-info">
         <p className="product-category">{categoria}</p>

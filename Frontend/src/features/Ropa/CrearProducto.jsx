@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Upload, Save, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { crearProducto } from "../../services/RopaService";
+import { getCategorias, crearCategoria } from "../../services/CategoriaService";
 
 const INITIAL_FORM = {
   nombre: "",
@@ -22,9 +23,55 @@ function CrearProducto() {
   const [error, setError] = useState("");
   const [ok, setOk] = useState("");
 
+  // Categorias
+  const [categorias, setCategorias] = useState([]);
+  const [showCatDropdown, setShowCatDropdown] = useState(false);
+  const [creatingCat, setCreatingCat] = useState(false);
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const data = await getCategorias();
+        setCategorias(data || []);
+      } catch (err) {
+        console.error("Error cargando categorias", err);
+      }
+    };
+    fetchCats();
+  }, []);
+
   const onFieldChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectCategoria = (nombre) => {
+    setForm((prev) => ({ ...prev, categoria: nombre }));
+    setShowCatDropdown(false);
+  };
+
+  const handleCategoriaKeyDown = async (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const val = (form.categoria || "").trim();
+      if (!val) return;
+
+      const existe = categorias.find((c) => c.nombre.toLowerCase() === val.toLowerCase());
+      if (!existe) {
+        setCreatingCat(true);
+        try {
+          const nueva = await crearCategoria(val);
+          setCategorias((prev) => [...prev, nueva]);
+          setForm((prev) => ({ ...prev, categoria: nueva.nombre }));
+          setOk(`Categoria "${nueva.nombre}" guardada en la base de datos.`);
+        } catch (err) {
+          setError("No se pudo guardar la categoria en la base de datos.");
+        } finally {
+          setCreatingCat(false);
+        }
+      }
+      setShowCatDropdown(false);
+    }
   };
 
   const handleAddTalla = () => {
@@ -61,15 +108,29 @@ function CrearProducto() {
       return;
     }
 
-    const payload = {
-      ...form,
-      precio: Number(form.precio),
-      stock: Number(form.stock),
-      tallas,
-    };
-
     setLoading(true);
     try {
+      // Si la categoria escrita no existe en la base de datos, la autoguardamos
+      const catVal = (form.categoria || "").trim();
+      if (catVal) {
+        const existe = categorias.find((c) => c.nombre.toLowerCase() === catVal.toLowerCase());
+        if (!existe) {
+          try {
+            const nueva = await crearCategoria(catVal);
+            setCategorias((prev) => [...prev, nueva]);
+          } catch (errCat) {
+            console.error("No se pudo autoguardar la categoria", errCat);
+          }
+        }
+      }
+
+      const payload = {
+        ...form,
+        precio: Number(form.precio),
+        stock: Number(form.stock),
+        tallas,
+      };
+
       const creado = await crearProducto(payload, imagenes);
       setOk(`Producto "${creado?.nombre}" creado con exito.`);
       setForm(INITIAL_FORM);
@@ -106,7 +167,64 @@ function CrearProducto() {
           <InputField label="Descripcion" name="descripcion" full placeholder="Detalles de la prenda" value={form.descripcion} onChange={onFieldChange} required />
           <InputField label="Precio" name="precio" type="number" placeholder="0" value={form.precio} onChange={onFieldChange} required />
           <InputField label="Stock inicial" name="stock" type="number" placeholder="10" value={form.stock} onChange={onFieldChange} required />
-          <InputField label="Categoria" name="categoria" placeholder="Remeras, Camperas" value={form.categoria} onChange={onFieldChange} required />
+
+          {/* Categoria Dropdown Input */}
+          <div className="admin-field">
+            <label htmlFor="categoria">Categoria</label>
+            <div className="admin-cat-container">
+              <input
+                id="categoria"
+                name="categoria"
+                type="text"
+                placeholder="Remeras, Camperas (Enter para nueva)"
+                value={form.categoria}
+                onChange={onFieldChange}
+                onFocus={() => setShowCatDropdown(true)}
+                onBlur={() => setTimeout(() => setShowCatDropdown(false), 180)}
+                onKeyDown={handleCategoriaKeyDown}
+                required
+                disabled={creatingCat}
+              />
+              {showCatDropdown && (
+                <ul className="admin-cat-dropdown">
+                  {categorias
+                    .filter((c) => c.nombre.toLowerCase().includes((form.categoria || "").toLowerCase()))
+                    .map((c) => (
+                      <li
+                        key={c.id}
+                        className={`admin-cat-item ${form.categoria.toLowerCase() === c.nombre.toLowerCase() ? "selected" : ""}`}
+                        onMouseDown={() => handleSelectCategoria(c.nombre)}
+                      >
+                        <span>{c.nombre}</span>
+                      </li>
+                    ))}
+                  {form.categoria && !categorias.some((c) => c.nombre.toLowerCase() === form.categoria.trim().toLowerCase()) && (
+                    <li
+                      className="admin-cat-item admin-cat-item-new"
+                      onMouseDown={async () => {
+                        const val = form.categoria.trim();
+                        if (!val) return;
+                        setCreatingCat(true);
+                        try {
+                          const nueva = await crearCategoria(val);
+                          setCategorias((prev) => [...prev, nueva]);
+                          setForm((prev) => ({ ...prev, categoria: nueva.nombre }));
+                          setOk(`Categoria "${nueva.nombre}" guardada en la base de datos.`);
+                        } catch (err) {
+                          setError("No se pudo guardar la categoria en la base de datos.");
+                        } finally {
+                          setCreatingCat(false);
+                        }
+                      }}
+                    >
+                      <span>+ Crear y elegir "{form.categoria}"</span>
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
+          </div>
+
           <InputField label="Color" name="color" placeholder="Negro, Azul" value={form.color} onChange={onFieldChange} required />
         </div>
 

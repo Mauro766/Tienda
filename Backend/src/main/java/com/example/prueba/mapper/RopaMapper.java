@@ -19,6 +19,7 @@ public class RopaMapper {
         dto.setColor(ropa.getColor());
         dto.setImagenesUrl(ropa.getImagenesUrl());
         dto.setActivo(ropa.getActivo());
+        dto.setCantidadVentas(ropa.getCantidadVentas() != null ? ropa.getCantidadVentas() : 0);
 
         return dto;
     }
@@ -37,6 +38,7 @@ public class RopaMapper {
 
         // valores por defecto
         ropa.setActivo(true);
+        ropa.setCantidadVentas(0);
 
         return ropa;
     }

@@ -39,6 +39,8 @@ public class RopaDTO {
 
     private Boolean activo;
 
+    private Integer cantidadVentas;
+
     // getters y setters
 
     public Long getId() {
@@ -129,5 +131,12 @@ public class RopaDTO {
         this.activo = activo;
     }
 
+    public Integer getCantidadVentas() {
+        return cantidadVentas;
+    }
+
+    public void setCantidadVentas(Integer cantidadVentas) {
+        this.cantidadVentas = cantidadVentas;
+    }
 
 }

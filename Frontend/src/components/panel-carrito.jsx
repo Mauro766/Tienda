@@ -4,7 +4,7 @@ import { obtenerCarrito, eliminarDelCarrito } from "../services/CarritoService";
 import "../styles/panelCarrito.css";
 import { getUserFromToken, refreshAuthUser } from "../utils/auth";
 
-function PanelCarrito({ isOpen, onClose }) {
+function PanelCarrito({ isOpen, onClose,id}) {
     const [carrito, setCarrito] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -77,8 +77,11 @@ function PanelCarrito({ isOpen, onClose }) {
     const formatImgUrl = (imagenes) => {
         if (!imagenes) return "/Campera.jpg";
         let url = Array.isArray(imagenes) && imagenes.length > 0 ? imagenes[0] : imagenes;
-        if (typeof url !== "string") return "/Campera.jpg";
-        return url.startsWith("http") ? url : `http://localhost:8081${url}`;
+        if (typeof url !== "string" || !url) return "/Campera.jpg";
+        if (url.startsWith("http")) return url;
+        // Si la URL no comienza con / (es solo un nombre de archivo), agregar /uploads/
+        if (!url.startsWith("/")) url = `/uploads/${url}`;
+        return `http://localhost:8081${url}`;
     };
 
     return (
@@ -101,7 +104,8 @@ function PanelCarrito({ isOpen, onClose }) {
 
                     {!loading && !error && (!carrito || !carrito.items || carrito.items.length === 0) ? (
                         <div className="cart-empty">
-                            <span className="cart-empty-icon">🛒</span>
+                            <svg  width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 01-8 0" /></svg>
+
                             <p>Tu carrito está vacío.</p>
                             <Link
                                 to="/busqueda"
@@ -116,25 +120,26 @@ function PanelCarrito({ isOpen, onClose }) {
                         carrito?.items?.map((item) => {
                             const prod = item.producto || item.ropa;
                             return (
-                            <div key={item.id} className="cart-item">
-                                <img src={formatImgUrl(prod?.imagenesUrl)} alt={prod?.nombre} />
-                                <div className="cart-item-details">
-                                    <div className="cart-item-info">
-                                        <h3>{prod?.nombre}</h3>
-                                        <p>Cantidad: {item.cantidad}</p>
-                                    </div>
-                                    <div className="cart-item-actions">
-                                        <p className="cart-item-price">{formatPrice(item.precio * item.cantidad)}</p>
-                                        <button
-                                            className="cart-item-remove"
-                                            onClick={() => handleEliminarItem(item)}
-                                        >
-                                            Eliminar
-                                        </button>
+                                <div key={item.id} className="cart-item">
+                                    <img src={formatImgUrl(prod?.imagenesUrl)} alt={prod?.nombre} />
+                                    <div className="cart-item-details">
+                                        <div className="cart-item-info">
+                                            <h3>{prod?.nombre}</h3>
+                                            <p>Cantidad: {item.cantidad}</p>
+                                        </div>
+                                        <div className="cart-item-actions">
+                                            <p className="cart-item-price">{formatPrice(item.precio * item.cantidad)}</p>
+                                            <button
+                                                className="cart-item-remove"
+                                                onClick={() => handleEliminarItem(item)}
+                                            >
+                                                Eliminar
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )})
+                            )
+                        })
                     )}
                 </div>
 

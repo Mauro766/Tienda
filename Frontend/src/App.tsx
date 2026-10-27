@@ -9,6 +9,9 @@ import Admin from "./pages/Admin/AdminPanel";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DatosPedidos from "./pages/Pedido/Datos";
+import ExitoPago from "./pages/Pedido/ExitoPago";
+import { ReactLenis } from 'lenis/react'
+import { useEffect, useRef } from 'react'
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -42,7 +45,23 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 }
 
 function App() {
+  const lenisRef = useRef<any>(null)
+
+  useEffect(() => {
+    let rafId: number
+
+    function update(time: number) {
+      lenisRef.current?.lenis?.raf(time)
+      rafId = requestAnimationFrame(update)
+    }
+
+    rafId = requestAnimationFrame(update)
+
+    return () => cancelAnimationFrame(rafId)
+  }, [])
+
   return (
+
     <ErrorBoundary>
       <BrowserRouter>
         <Routes>
@@ -62,12 +81,13 @@ function App() {
             path="/admin"
             element={
               <ProtectedRoute requiredRole="ROLE_ADMIN">
-                <Admin/>
+                <Admin />
               </ProtectedRoute>
             }
           />
 
           <Route path="/login" element={<Login />} />
+          <Route path="/pedido/exito" element={<ExitoPago />} />
           <Route path="*" element={<Error />} />
         </Routes>
       </BrowserRouter>

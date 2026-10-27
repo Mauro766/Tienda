@@ -62,6 +62,9 @@ public class Ropa {
     @Column(nullable = false)
     private Boolean activo = true;
 
+    @Column(nullable = false)
+    private Integer cantidadVentas = 0;
+
     @CreationTimestamp
     private LocalDateTime fechaCreacion;
 
@@ -161,6 +164,14 @@ public class Ropa {
 
     public void setFechaCreacion(LocalDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
+    }
+
+    public Integer getCantidadVentas() {
+        return cantidadVentas;
+    }
+
+    public void setCantidadVentas(Integer cantidadVentas) {
+        this.cantidadVentas = cantidadVentas;
     }
 
 }

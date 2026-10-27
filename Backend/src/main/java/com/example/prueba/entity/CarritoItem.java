@@ -10,15 +10,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "carrito_item")
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class CarritoItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,4 +32,55 @@ public class CarritoItem {
     private Integer cantidad;
 
     private BigDecimal precio; // precio al momento de agregar
+
+    public CarritoItem() {
+    }
+
+    public CarritoItem(Long id, Carrito carrito, Ropa producto, Integer cantidad, BigDecimal precio) {
+        this.id = id;
+        this.carrito = carrito;
+        this.producto = producto;
+        this.cantidad = cantidad;
+        this.precio = precio;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Carrito getCarrito() {
+        return carrito;
+    }
+
+    public void setCarrito(Carrito carrito) {
+        this.carrito = carrito;
+    }
+
+    public Ropa getProducto() {
+        return producto;
+    }
+
+    public void setProducto(Ropa producto) {
+        this.producto = producto;
+    }
+
+    public Integer getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(Integer cantidad) {
+        this.cantidad = cantidad;
+    }
+
+    public BigDecimal getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(BigDecimal precio) {
+        this.precio = precio;
+    }
 }

@@ -2,68 +2,49 @@ import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import { Link } from "react-router-dom";
 import Hero from "../components/Hero";
+import Marcas from "../components/marcas"
 import ProductSection from "../components/ProductSection";
 import Footer from "../components/Footer";
-import { getProductos } from "../services/RopaService";
+import { getProductos, getProductosMasVendidos } from "../services/RopaService";
+import Historia from "../components/historia";
 import "../styles/home.css";
 
 function Home() {
   const [productos, setProductos] = useState([]);
+  const [masVendidos, setMasVendidos] = useState([]);
 
   useEffect(() => {
-    const fetchProductos = async () => {
+    const fetchAllProductos = async () => {
       try {
-        const data = await getProductos();
-        const productosData = Array.isArray(data) ? data : (data?.content || []);
+        const [dataProductos, dataMasVendidos] = await Promise.all([
+          getProductos(),
+          getProductosMasVendidos(4)
+        ]);
+        const productosData = Array.isArray(dataProductos) ? dataProductos : (dataProductos?.content || []);
         setProductos(productosData);
+        setMasVendidos(Array.isArray(dataMasVendidos) ? dataMasVendidos : []);
       } catch (err) {
         console.error("No se pudo cargar los productos:", err);
       }
     };
-    fetchProductos();
+    fetchAllProductos();
   }, []);
 
   const nuevosIngresos = productos.slice(0, 4);
-  const masVendidos = productos.length > 4 ? productos.slice(4, 8) : [];
-  
+
   return (
     <>
-      <Header/>
+      <Header />
       <Hero />
+      <Marcas/>
 
       <main className="home-main">
-        <section className="home-benefits" aria-label="Beneficios de la tienda">
-          <article className="benefit-card">
-            <img src="/marker.png" alt="" aria-hidden="true" />
-            <div>
-              <h3>Envios a todo el pais</h3>
-              <p>Despacho rapido y seguimiento de tu pedido.</p>
-            </div>
-          </article>
-
-          <article className="benefit-card">
-            <img src="/credit-card.png" alt="" aria-hidden="true" />
-            <div>
-              <h3>Pagos seguros</h3>
-              <p>Tarjeta, transferencia y cuotas sin interes.</p>
-            </div>
-          </article>
-
-          <article className="benefit-card">
-            <img src="/shopping-cart.png" alt="" aria-hidden="true" />
-            <div>
-              <h3>Cambios simples</h3>
-              <p>Gestiona cambios de talle sin vueltas.</p>
-            </div>
-          </article>
-        </section>
-
         <section className="home-categories" aria-label="Categorias destacadas">
-          <Link viewTransition to="/busqueda" className="category-pill">Remeras</Link>
-          <Link viewTransition to="/busqueda" className="category-pill">Pantalones</Link>
-          <Link viewTransition to="/busqueda" className="category-pill">Calzado</Link>
-          <Link viewTransition to="/busqueda" className="category-pill">Buzos</Link>
-          <Link viewTransition to="/busqueda" className="category-pill">Camperas</Link>
+          <Link viewTransition to="/busqueda?cat=Remeras" className="category-pill">Remeras</Link>
+          <Link viewTransition to="/busqueda?cat=Pantalones" className="category-pill">Pantalones</Link>
+          <Link viewTransition to="/busqueda?cat=Calzado" className="category-pill">Calzado</Link>
+          <Link viewTransition to="/busqueda?cat=Buzos" className="category-pill">Buzos</Link>
+          <Link viewTransition to="/busqueda?cat=Camperas" className="category-pill">Camperas</Link>
         </section>
 
         <ProductSection
@@ -80,7 +61,8 @@ function Home() {
           />
         )}
       </main>
-      <Footer/>
+      <Historia/>
+      <Footer />
     </>
   );
 }

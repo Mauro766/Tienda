@@ -143,12 +143,21 @@ public class PedidoService {
     }
 
     @Transactional(readOnly = true)
+    public Pedido obtenerPorId(Long pedidoId) {
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+        org.hibernate.Hibernate.initialize(pedido.getItems());
+        org.hibernate.Hibernate.initialize(pedido.getUsuario());
+        return pedido;
+    }
+
+    @Transactional(readOnly = true)
     public List<RopaDTO> obtenerProductosMasVendidos(int limite) {
         int limiteFinal = limite > 0 ? limite : 3;
         Pageable pageable = PageRequest.of(0, limiteFinal);
 
-        return pedidoRepository
-                .obtenerProductosMasVendidos(EstadoPedido.CANCELADO, pageable)
+        return ropaRepository
+                .findByActivoTrueAndCantidadVentasGreaterThanEqualOrderByCantidadVentasDesc(5, pageable)
                 .stream()
                 .map(RopaMapper::toDTO)
                 .peek(this::agregarPrefijoImagenes)
@@ -172,6 +181,8 @@ public class PedidoService {
         }
 
         producto.setStock(stockActual - item.getCantidad());
+        int ventasActuales = producto.getCantidadVentas() == null ? 0 : producto.getCantidadVentas();
+        producto.setCantidadVentas(ventasActuales + item.getCantidad());
         return producto;
     }
 
@@ -189,6 +200,8 @@ public class PedidoService {
 
             int stockActual = producto.getStock() == null ? 0 : producto.getStock();
             producto.setStock(stockActual + item.getCantidad());
+            int ventasActuales = producto.getCantidadVentas() == null ? 0 : producto.getCantidadVentas();
+            producto.setCantidadVentas(Math.max(0, ventasActuales - item.getCantidad()));
         }
 
 

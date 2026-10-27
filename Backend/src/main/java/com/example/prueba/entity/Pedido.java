@@ -19,15 +19,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 @Entity
-@Data
 @Table(name = "pedido")
-@AllArgsConstructor
-@NoArgsConstructor
 public class Pedido {
 
   @Id
@@ -64,6 +57,94 @@ public class Pedido {
   public void prePersist() {
     this.fecha = LocalDateTime.now();
     this.estado = EstadoPedido.PENDIENTE;
+  }
+
+  public Pedido() {
+  }
+
+  public Pedido(Long id, Usuario usuario, String direccion, String ciudad, String telefono, BigDecimal total,
+      LocalDateTime fecha, List<PedidoItem> items, EstadoPedido estado) {
+    this.id = id;
+    this.usuario = usuario;
+    this.direccion = direccion;
+    this.ciudad = ciudad;
+    this.telefono = telefono;
+    this.total = total;
+    this.fecha = fecha;
+    this.items = items;
+    this.estado = estado;
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public Usuario getUsuario() {
+    return usuario;
+  }
+
+  public void setUsuario(Usuario usuario) {
+    this.usuario = usuario;
+  }
+
+  public String getDireccion() {
+    return direccion;
+  }
+
+  public void setDireccion(String direccion) {
+    this.direccion = direccion;
+  }
+
+  public String getCiudad() {
+    return ciudad;
+  }
+
+  public void setCiudad(String ciudad) {
+    this.ciudad = ciudad;
+  }
+
+  public String getTelefono() {
+    return telefono;
+  }
+
+  public void setTelefono(String telefono) {
+    this.telefono = telefono;
+  }
+
+  public BigDecimal getTotal() {
+    return total;
+  }
+
+  public void setTotal(BigDecimal total) {
+    this.total = total;
+  }
+
+  public LocalDateTime getFecha() {
+    return fecha;
+  }
+
+  public void setFecha(LocalDateTime fecha) {
+    this.fecha = fecha;
+  }
+
+  public List<PedidoItem> getItems() {
+    return items;
+  }
+
+  public void setItems(List<PedidoItem> items) {
+    this.items = items;
+  }
+
+  public EstadoPedido getEstado() {
+    return estado;
+  }
+
+  public void setEstado(EstadoPedido estado) {
+    this.estado = estado;
   }
 
 }

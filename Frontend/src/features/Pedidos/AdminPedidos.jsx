@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getPedidos, cambiarDeEstado } from "../../services/PedidoService";
 import "../../styles/Pedido/adminPedidos.css";
+import { usePedidosSocket } from "../../hooks/usePedidosSocket";
 
 const estados = ["PENDIENTE", "ARCHIVADO", "ENVIADO", "CANCELADO"];
 
@@ -43,6 +44,7 @@ function AdminPedidos() {
   const [updatingId, setUpdatingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [hayNuevo, setHayNuevo] = useState(false);
 
   const fetchPedidos = async () => {
     try {
@@ -68,6 +70,21 @@ function AdminPedidos() {
     fetchPedidos();
   }, []);
 
+  usePedidosSocket((nuevoPedido) => {
+    console.log("[WS] Pedido recibido en AdminPedidos:", nuevoPedido);
+    setPedidos((prev) => {
+      // Si el pedido ya existe, lo actualizamos (puede que haya cambiado de estado o algo)
+      if (prev.some((p) => p.id === nuevoPedido.id)) {
+        console.log("[WS] Actualizando pedido existente:", nuevoPedido.id);
+        return prev.map(p => p.id === nuevoPedido.id ? nuevoPedido : p);
+      }
+      // Si no existe, lo agregamos arriba
+      console.log("[WS] Agregando nuevo pedido:", nuevoPedido.id);
+      return [nuevoPedido, ...prev];
+    });
+    setHayNuevo(true);
+  });
+
   const enviadosCount = useMemo(
     () => pedidos.filter((pedido) => pedido.estado === "ENVIADO").length,
     [pedidos]
@@ -86,9 +103,9 @@ function AdminPedidos() {
   const pedidosPorTab = useMemo(() => {
     if (activeTab === "enviados") {
       return pedidos.filter((pedido) => pedido.estado === "ENVIADO");
-    }else if(activeTab === "pendientes"){
-       return pedidos.filter((pedido) => pedido.estado === "PENDIENTE");
-    }else if(activeTab === "cancelados"){
+    } else if (activeTab === "pendientes") {
+      return pedidos.filter((pedido) => pedido.estado === "PENDIENTE");
+    } else if (activeTab === "cancelados") {
       return pedidos.filter((pedido) => pedido.estado === "CANCELADO");
     }
     return pedidos;
@@ -153,7 +170,18 @@ function AdminPedidos() {
             Selecciona una persona para ver el detalle completo de su pedido.
           </p>
         </div>
-        <span className="admin-chip">{pendientesCount} pedidos</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span className="admin-chip">{pendientesCount} pedidos</span>
+          {hayNuevo && (
+            <span
+              className="admin-chip"
+              style={{ background: "#e53e3e", color: "#fff", cursor: "pointer" }}
+              onClick={() => setHayNuevo(false)}
+            >
+              🔔 Nuevo pedido
+            </span>
+          )}
+        </div>
       </header>
 
       {error && <div className="admin-alert admin-alert-error pedidos-alert">{error}</div>}
@@ -263,9 +291,8 @@ function AdminPedidos() {
                     <p>{formatDate(pedidoSeleccionado.fecha)}</p>
                   </div>
                   <span
-                    className={`pedido-estado-chip ${
-                      estadoClassMap[pedidoSeleccionado.estado] || "estado-default"
-                    }`}
+                    className={`pedido-estado-chip ${estadoClassMap[pedidoSeleccionado.estado] || "estado-default"
+                      }`}
                   >
                     {pedidoSeleccionado.estado}
                   </span>

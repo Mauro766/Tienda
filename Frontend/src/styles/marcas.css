@@ -1,0 +1,74 @@
+.carrusel {
+    background-color: #000;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Fades negros a los costados */
+.carrusel-fade {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 120px;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.carrusel-fade-left {
+    left: 0;
+    background: linear-gradient(to right, #000 20%, transparent 100%);
+}
+
+.carrusel-fade-right {
+    right: 0;
+    background: linear-gradient(to left, #000 20%, transparent 100%);
+}
+
+.carrusel-track {
+    display: flex;
+    align-items: center;
+    gap: 80px;
+    animation: marquee 12s linear infinite;
+    flex-shrink: 0;
+    width: max-content;
+}
+
+.carrusel-track img {
+    height: 55px;
+    width: auto;
+    object-fit: contain;
+    filter: invert(1);
+    flex-shrink: 0;
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+}
+
+.carrusel-track img:hover {
+    opacity: 1;
+}
+
+@keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-25%); }
+}
+
+
+@media (max-width: 960px) {
+.carrusel {
+    height: 75px;
+}
+
+.carrusel-track img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+    filter: invert(1);
+    flex-shrink: 0;
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+}
+
+}

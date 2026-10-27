@@ -20,6 +20,8 @@ public interface RopaRepository extends JpaRepository<Ropa, Long> {
 
     Page<Ropa> findByActivoTrue(Pageable pageable);
 
+    Page<Ropa> findByActivoTrueAndCantidadVentasGreaterThanEqualOrderByCantidadVentasDesc(Integer minimoVentas, Pageable pageable);
+
     Page<Ropa> findByNombreContainingIgnoreCaseAndActivoTrue(
             String nombre,
             Pageable pageable);

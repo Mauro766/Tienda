@@ -20,9 +20,16 @@ navigation: auto;
 }
 
 .home-benefits {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  position: absolute;
+  bottom: 40px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
 }
 
 .benefit-card {
@@ -31,6 +38,7 @@ navigation: auto;
   gap: 0.75rem;
   padding: 0.9rem;
   border-radius: 16px;
+  width: 250px;
   border: 1px solid #e1e4e8;
   background: rgba(255, 255, 255, 0.84);
   box-shadow: 0 10px 20px rgba(12, 18, 24, 0.08);
@@ -88,7 +96,41 @@ navigation: auto;
 
 @media (max-width: 960px) {
   .home-benefits {
-    grid-template-columns: 1fr;
+    display: none;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding: 0 20px 10px 20px;
+    gap: 16px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    bottom: 20px;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 20px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .home-title {
+    font-size: 1.8rem;
+    top: 150px;
+    right: 150px;
+  }
+
+  .home-benefits::-webkit-scrollbar {
+    display: none;
+  }
+
+  .home-benefits .benefit-card {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    width: 40vw;
+    max-width: 280px;
+  }
+
+  /* Truco para evitar que la última tarjeta quede pegada al borde derecho */
+  .home-benefits::after {
+    content: '';
+    flex: 0 0 4px; /* Un pequeño espacio extra */
   }
 }
 

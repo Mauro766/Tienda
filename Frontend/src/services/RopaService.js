@@ -3,6 +3,15 @@ import { getAuthHeadersOnly } from "../utils/api";
 const API_URL = "http://localhost:8081/ropa";
 const PEDIDO_API_URL = "http://localhost:8081/pedido";
 
+const getErrorMessage = async (res, fallbackMessage) => {
+  try {
+    const data = await res.json();
+    return data?.message || data?.error || fallbackMessage;
+  } catch {
+    return fallbackMessage;
+  }
+};
+
 export const crearProducto = async (ropa, imagenes) => {
   const formData = new FormData();
 
@@ -114,7 +123,7 @@ export const eliminarProducto = async (id) => {
   });
 
   if (!res.ok) {
-    throw new Error("Error eliminando producto");
+    throw new Error(await getErrorMessage(res, "Error eliminando producto"));
   }
 
   return res;
@@ -158,7 +167,7 @@ export const filtrarProductos = async (params) => {
 };
 
 export const getProductosMasVendidos = async (limite = 3) => {
-  const res = await fetch(`${PEDIDO_API_URL}/mas-vendidos?limite=${limite}`);
+  const res = await fetch(`${API_URL}/mas-vendidos?limite=${limite}`);
   if (!res.ok) {
     throw new Error("Error obteniendo productos mas vendidos");
   }

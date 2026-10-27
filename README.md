@@ -59,3 +59,14 @@ Incluye autenticación segura, administración de productos y funcionalidades co
 
 - Soporte para carga de imágenes de productos
 - Almacenamiento configurado en el servidor
+
+---
+
+## 💸 Integración con Mercado Pago y WebSockets (Novedad)
+
+- **Checkout y Preferencias de Pago**: Creación de preferencias de pago con la API de Mercado Pago al confirmar un pedido desde el carrito.
+- **Notificaciones en Tiempo Real (WebSockets / STOMP)**: 
+  - Comunicación bidireccional entre el backend (Spring Boot) y el Panel Admin (React).
+  - Al completar un pago, Mercado Pago redirige al endpoint `/pagos/success`, el cual emite un aviso al instante al canal `/topic/pedidos`.
+  - El Panel Admin recibe el evento por WebSocket y actualiza o inserta el pedido en la vista automáticamente sin necesidad de recargar la página.
+- **Manejo de Transacciones**: Inicialización explícita de colecciones Lazy (productos y usuario) en Hibernate para asegurar la correcta serialización de objetos hacia JSON al enviarlos por el WebSocket.

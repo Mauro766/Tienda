@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import LoginDrawer from "../components/LoginDrawer";
 import "../styles/Login/IniciarSesion.css";
 import Header from "../components/Header";
@@ -5,6 +6,13 @@ import Footer from "../components/Footer";
 
 
 function Login() {
+
+  useEffect(() => {
+          window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+          });
+      },[]);
   return (
     <>
     <Header />

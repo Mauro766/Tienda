@@ -6,6 +6,7 @@ function RopaInfo({ id, nombre, precio, descripcion, imagenesUrl, tallas, color,
     const formatUrl = (url) => url?.startsWith("/uploads/") ? `http://localhost:8081${url}` : url;
     const rawImages = Array.isArray(imagenesUrl) && imagenesUrl.length > 0 ? imagenesUrl : ["/Campera.jpg"];
     const validImages = rawImages.map(formatUrl);
+    const imageTransitionName = id ? `producto-imagen-${id}` : undefined;
     
     const [currentIndex, setCurrentIndex] = useState(0);
     const [quantity, setQuantity] = useState(1);
@@ -42,10 +43,12 @@ function RopaInfo({ id, nombre, precio, descripcion, imagenesUrl, tallas, color,
                 <div className="info-media">
                     <div className="image-showcase">
                         <img 
-                            key={currentIndex} 
                             src={validImages[currentIndex]} 
                             alt={nombre} 
                             className="main-product-img" 
+                            style={{
+                                viewTransitionName: currentIndex === 0 ? imageTransitionName : "none",
+                            }}
                         />
                         
                         {validImages.length > 1 && (

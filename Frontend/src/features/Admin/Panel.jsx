@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   PlusCircle,
@@ -138,17 +137,12 @@ function Panel() {
       )}
 
       <div className={cn("admin-layout", isPedidosView && "admin-layout-full")}>
-        <AnimatePresence>
           {!isPedidosView && sidebarOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+            <div
               onClick={() => setSidebarOpen(false)}
               className="sidebar-overlay"
             />
           )}
-        </AnimatePresence>
 
         {!isPedidosView && (
           <aside className={cn("sidebar", sidebarOpen && "open")}>
@@ -185,7 +179,7 @@ function Panel() {
                           <small className="nav-subtitle">{item.subtitle}</small>
                         </div>
                       </div>
-                      {isActive && <motion.div layoutId="activeDot" className="active-dot" />}
+                      {isActive && <div className="active-dot" />}
                     </button>
                   );
                 })}
@@ -205,14 +199,9 @@ function Panel() {
           {!isPedidosView && (
             <header className="content-header">
               <div>
-                <motion.div
-                  key={activeView}
-                  initial={{ opacity: 0, y: -12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="breadcrumb"
-                >
+                <div className="breadcrumb">
 
-                </motion.div>
+                </div>
                 <h1 className="page-title">{activeItem.label}</h1>
 
               </div>
@@ -231,15 +220,9 @@ function Panel() {
             </div>
           )}
 
-          <motion.div
-            key={activeView}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="content-wrapper"
-          >
+          <div className="content-wrapper">
             <div className="glass-container">{renderContent()}</div>
-          </motion.div>
+          </div>
         </main>
       </div>
     </div>

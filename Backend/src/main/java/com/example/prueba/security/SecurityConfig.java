@@ -50,7 +50,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/ropa/filtrar").permitAll()
                         .requestMatchers(HttpMethod.GET, "/ropa/id/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/ropa/admin").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/ropa/mas-vendidos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/pedido/mas-vendidos").permitAll()
+                        .requestMatchers("/pagos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/categoria/**").permitAll()
                         .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

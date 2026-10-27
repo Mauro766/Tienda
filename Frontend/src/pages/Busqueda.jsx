@@ -3,16 +3,16 @@ import { useLocation } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ProductCard from "../components/ProductCard";
+import { getCategorias } from "../services/CategoriaService";
 import { filtrarProductos } from "../services/RopaService";
 import "../styles/busqueda.css";
 
-const CATEGORIAS = ["REMERAS", "PANTALONES", "CALZADO", "BUZOS", "CAMPERAS"];
 const TALLES = ["S", "M", "L", "XL", "40", "41", "42", "43"];
 const COLORES = ["Negro", "Blanco", "Azul", "Verde", "Gris", "Marron"];
 const PRECIO_RANGOS = [
   { id: "0-35000", label: "Hasta $35.000", min: 0, max: 35000 },
-  { id: "35001-65000", label: "$35.001 - $65.000", min: 35001, max: 65000 },
-  { id: "65001-999999", label: "Mas de $65.000", min: 65001, max: 1000000 }
+  { id: "35001-150000", label: "$35.001 - $150.000", min: 35001, max: 150000 },
+  { id: "65001-999999", label: "Mas de $65.000", min: 65001, max: 1000000 },
 ];
 
 const COLOR_HEX = {
@@ -21,12 +21,13 @@ const COLOR_HEX = {
   Azul: "#3d62d3",
   Verde: "#2b8a5d",
   Gris: "#8d99ae",
-  Marron: "#9c6644"
+  Marron: "#9c6644",
 };
 
 function Busqueda() {
   const location = useLocation();
   const [productos, setProductos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
   const [query, setQuery] = useState("");
   const [categoria, setCategoria] = useState("");
   const [precioId, setPrecioId] = useState("");
@@ -35,27 +36,42 @@ function Busqueda() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 🔄 Obtener query inicial desde la URL (?q=...)
+  // Cargar categorias desde la base de datos
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const data = await getCategorias();
+        setCategorias(data || []);
+      } catch (err) {
+        console.error("Error cargando categorias", err);
+      }
+    };
+    fetchCats();
+  }, []);
+
+  // Obtener query y categoria inicial desde la URL (?q=...&cat=...)
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const q = params.get("q");
+    const cat = params.get("cat");
     if (q) setQuery(q);
+    if (cat) setCategoria(cat);
   }, [location.search]);
 
   const fetchFiltered = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const rango = PRECIO_RANGOS.find(r => r.id === precioId);
+      const rango = PRECIO_RANGOS.find((r) => r.id === precioId);
       const params = {
         nombre: query,
         categoria: categoria || null,
         precioMin: rango ? rango.min : null,
         precioMax: rango ? rango.max : null,
         color: color || null,
-        talla: talle || null
+        talla: talle || null,
       };
-      
+
       const data = await filtrarProductos(params);
       setProductos(data);
     } catch (err) {
@@ -69,7 +85,7 @@ function Busqueda() {
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchFiltered();
-    }, 300); // Debounce para no saturar al escribir
+    }, 300);
     return () => clearTimeout(timer);
   }, [fetchFiltered]);
 
@@ -101,13 +117,19 @@ function Busqueda() {
             <div className="filter-group">
               <h3>Categorías</h3>
               <div className="chip-group">
-                {CATEGORIAS.map((cat) => (
+                {categorias.map((cat) => (
                   <button
-                    key={cat}
-                    className={`chip-button ${categoria === cat ? "active" : ""}`}
-                    onClick={() => setCategoria(cat === categoria ? "" : cat)}
+                    key={cat.id}
+                    className={`chip-button ${
+                      categoria && categoria.toLowerCase() === cat.nombre.toLowerCase() ? "active" : ""
+                    }`}
+                    onClick={() =>
+                      setCategoria(
+                        categoria && categoria.toLowerCase() === cat.nombre.toLowerCase() ? "" : cat.nombre
+                      )
+                    }
                   >
-                    {cat}
+                    {cat.nombre}
                   </button>
                 ))}
               </div>

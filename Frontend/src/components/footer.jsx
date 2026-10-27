@@ -22,7 +22,7 @@ function Footer() {
                 <a className="footer-button-a" href=""><img  src="/youtube.png" alt="" /></a>
                 <a className="footer-button-a" href=""><img  src="/tik-tok.png" alt="" /></a>
             </div>
-        </footer> 
+        </footer>
     );
 }
 

@@ -34,6 +34,7 @@ export const misPedidos = async () => {
 export const checkout = async (datos) => {
     const res = await fetch(`${API_URL}/checkout`, {
         method: "POST",
+        credentials: "include",
         headers: {
             ...getAuthHeadersOnly(),
             "Content-Type": "application/json",
@@ -42,7 +43,9 @@ export const checkout = async (datos) => {
     });
 
     if (!res.ok) {
-        throw new Error("Error al realizar la compra");
+        const errorData = await res.json().catch(() => ({}));
+        const validationErrors = errorData.errors ? Object.values(errorData.errors).join(", ") : null;
+        throw new Error(validationErrors || errorData.message || "Error al realizar la compra");
     }
 
     return res.json();
