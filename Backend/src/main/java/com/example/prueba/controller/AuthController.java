@@ -55,6 +55,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        System.out.println(">>> LLEGÓ UNA PETICIÓN A /auth/login");
         String loginId = normalizarLoginId(request.getLoginId());
         String password = request.getPassword() == null ? "" : request.getPassword();
 
