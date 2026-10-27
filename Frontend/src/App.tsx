@@ -10,7 +10,6 @@ import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DatosPedidos from "./pages/Pedido/Datos";
 import ExitoPago from "./pages/Pedido/ExitoPago";
-import { ReactLenis } from 'lenis/react'
 import { useEffect, useRef } from 'react'
 
 interface ErrorBoundaryProps {

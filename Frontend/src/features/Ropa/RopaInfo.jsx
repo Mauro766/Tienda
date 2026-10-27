@@ -1,11 +1,11 @@
 import { useState } from "react";
 import "../../styles/RopaInfo.css";
 import { agregarAlCarrito } from "../../services/CarritoService";
+import { formatImageUrl } from "../../config";
 
 function RopaInfo({ id, nombre, precio, descripcion, imagenesUrl, tallas, color, categoria }) {
-    const formatUrl = (url) => url?.startsWith("/uploads/") ? `http://localhost:8081${url}` : url;
     const rawImages = Array.isArray(imagenesUrl) && imagenesUrl.length > 0 ? imagenesUrl : ["/Campera.jpg"];
-    const validImages = rawImages.map(formatUrl);
+    const validImages = rawImages.map((img) => formatImageUrl(img, "/Campera.jpg"));
     const imageTransitionName = id ? `producto-imagen-${id}` : undefined;
     
     const [currentIndex, setCurrentIndex] = useState(0);

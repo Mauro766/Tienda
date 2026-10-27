@@ -1,6 +1,7 @@
 import { getAuthHeadersOnly } from "../utils/api";
+import { API_URL as BASE_URL } from "../config";
 
-const API_URL = "http://localhost:8081/pedido";
+const API_URL = `${BASE_URL}/pedido`;
 
 export const cambiarDeEstado = async (id, estado) => {
     const res = await fetch(`${API_URL}/${id}/estado`, {

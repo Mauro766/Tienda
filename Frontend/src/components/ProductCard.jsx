@@ -1,5 +1,6 @@
 import "../styles/cards.css";
 import { Link } from "react-router-dom";
+import { formatImageUrl } from "../config";
 
 
 function formatPrice(precio) {
@@ -23,11 +24,7 @@ function ProductCard({
 
   const coverImage = Array.isArray(imagenesUrl) && imagenesUrl.length > 0 ? imagenesUrl[0] : null;
 
-  const imageSrc = coverImage
-    ? coverImage.startsWith("/uploads/")
-      ? `http://localhost:8081${coverImage}`
-      : coverImage
-    : "/Campera.jpg";
+  const imageSrc = formatImageUrl(coverImage, "/Campera.jpg");
 
   return (
     <article className="product-card" style={{ position: 'relative' }}>

@@ -1,4 +1,6 @@
-const API_URL = "http://localhost:8081/categoria";
+import { API_URL as BASE_URL } from "../config";
+
+const API_URL = `${BASE_URL}/categoria`;
 
 export const getCategorias = async () => {
   const res = await fetch(API_URL, {

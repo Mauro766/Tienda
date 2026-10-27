@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { getProductosAdmin, getProductoById, actualizarProducto } from "../../services/RopaService";
 import { getCategorias, crearCategoria } from "../../services/CategoriaService";
+import { formatImageUrl } from "../../config";
 
 function EditarProducto() {
   const [productos, setProductos] = useState([]);
@@ -235,13 +236,7 @@ function EditarProducto() {
                     <div className="admin-list-left">
                       <img
                         className="admin-list-thumb"
-                        src={
-                          p.imagenesUrl?.[0]
-                            ? p.imagenesUrl[0].startsWith("http")
-                              ? p.imagenesUrl[0]
-                              : `http://localhost:8081${p.imagenesUrl[0]}`
-                            : "/Campera.jpg"
-                        }
+                        src={formatImageUrl(p.imagenesUrl?.[0], "/Campera.jpg")}
                         alt={p.nombre}
                       />
                       <div>
@@ -368,11 +363,7 @@ function EditarProducto() {
                     src={
                       image
                         ? URL.createObjectURL(image)
-                        : selectedProducto.imagenesUrl?.[0]
-                        ? selectedProducto.imagenesUrl[0].startsWith("http")
-                          ? selectedProducto.imagenesUrl[0]
-                          : `http://localhost:8081${selectedProducto.imagenesUrl[0]}`
-                        : "/Campera.jpg"
+                        : formatImageUrl(selectedProducto.imagenesUrl?.[0], "/Campera.jpg")
                     }
                     alt="Preview"
                   />

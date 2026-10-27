@@ -1,7 +1,7 @@
 import { getAuthHeadersOnly } from "../utils/api";
+import { API_URL as BASE_URL } from "../config";
 
-
-const API = "http://localhost:8081/pagos";
+const API = `${BASE_URL}/pagos`;
 
 export const crearPago = async (ropaId) => {
 

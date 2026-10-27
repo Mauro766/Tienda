@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { API_URL } from "../config";
 
 export function usePedidosSocket(onNuevoPedido) {
   // Guardamos la última versión del callback en un ref
@@ -14,8 +15,7 @@ export function usePedidosSocket(onNuevoPedido) {
 
   useEffect(() => {
     const client = new Client({
-      webSocketFactory: () => new SockJS("http://localhost:8081/ws"),
-      reconnectDelay: 5000, // reconecta automáticamente si se cae
+      webSocketFactory: () => new SockJS(`${API_URL}/ws`), reconnectDelay: 5000, // reconecta automáticamente si se cae
       onConnect: () => {
         console.log("[WS] Conectado al topic /topic/pedidos");
         client.subscribe("/topic/pedidos", (msg) => {

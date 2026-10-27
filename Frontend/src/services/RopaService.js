@@ -1,7 +1,8 @@
 import { getAuthHeadersOnly } from "../utils/api";
+import { API_URL as BASE_URL } from "../config";
 
-const API_URL = "http://localhost:8081/ropa";
-const PEDIDO_API_URL = "http://localhost:8081/pedido";
+const API_URL = `${BASE_URL}/ropa`;
+const PEDIDO_API_URL = `${BASE_URL}/pedido`;
 
 const getErrorMessage = async (res, fallbackMessage) => {
   try {

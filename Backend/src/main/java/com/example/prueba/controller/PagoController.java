@@ -4,6 +4,7 @@ import com.example.prueba.entity.Pedido;
 import com.example.prueba.servicio.PedidoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
@@ -16,10 +17,15 @@ public class PagoController {
 
     private final PedidoService pedidoService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final String frontendUrl;
 
-    public PagoController(PedidoService pedidoService, SimpMessagingTemplate messagingTemplate) {
+    public PagoController(
+            PedidoService pedidoService,
+            SimpMessagingTemplate messagingTemplate,
+            @Value("${app.frontend.url:http://localhost:5173}") String frontendUrl) {
         this.pedidoService = pedidoService;
         this.messagingTemplate = messagingTemplate;
+        this.frontendUrl = frontendUrl.endsWith("/") ? frontendUrl : frontendUrl + "/";
     }
 
     /**
@@ -49,18 +55,18 @@ public class PagoController {
         }
 
         // Redirigir al frontend - pagina principal
-        return new RedirectView("http://localhost:5173/");
+        return new RedirectView(frontendUrl);
     }
 
     @GetMapping("/failure")
     public RedirectView failure() {
         logger.info("[Pago] Pago fallido");
-        return new RedirectView("http://localhost:5173/");
+        return new RedirectView(frontendUrl);
     }
 
     @GetMapping("/pending")
     public RedirectView pending() {
         logger.info("[Pago] Pago pendiente");
-        return new RedirectView("http://localhost:5173/");
+        return new RedirectView(frontendUrl);
     }
 }

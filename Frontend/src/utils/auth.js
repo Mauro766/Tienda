@@ -1,4 +1,6 @@
-const AUTH_URL = "http://localhost:8081/auth";
+import { API_URL } from "../config";
+
+const AUTH_URL = `${API_URL}/auth`;
 const USER_STORAGE_KEY = "auth_user_profile";
 
 let cachedUser = null;

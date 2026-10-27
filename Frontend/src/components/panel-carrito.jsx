@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { obtenerCarrito, eliminarDelCarrito } from "../services/CarritoService";
 import "../styles/panelCarrito.css";
 import { getUserFromToken, refreshAuthUser } from "../utils/auth";
+import { formatImageUrl } from "../config";
 
 function PanelCarrito({ isOpen, onClose,id}) {
     const [carrito, setCarrito] = useState(null);
@@ -74,15 +75,7 @@ function PanelCarrito({ isOpen, onClose,id}) {
     };
 
     // Imagen formateada
-    const formatImgUrl = (imagenes) => {
-        if (!imagenes) return "/Campera.jpg";
-        let url = Array.isArray(imagenes) && imagenes.length > 0 ? imagenes[0] : imagenes;
-        if (typeof url !== "string" || !url) return "/Campera.jpg";
-        if (url.startsWith("http")) return url;
-        // Si la URL no comienza con / (es solo un nombre de archivo), agregar /uploads/
-        if (!url.startsWith("/")) url = `/uploads/${url}`;
-        return `http://localhost:8081${url}`;
-    };
+    const formatImgUrl = (imagenes) => formatImageUrl(imagenes, "/Campera.jpg");
 
     return (
         <div className={`cart-overlay ${isOpen ? "active" : ""}`} onClick={onClose}>

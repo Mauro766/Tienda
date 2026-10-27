@@ -1,6 +1,7 @@
 import { getUserFromToken, refreshAuthUser } from "../utils/auth";
+import { API_URL as BASE_URL } from "../config";
 
-const API_URL = "http://localhost:8081/carrito";
+const API_URL = `${BASE_URL}/carrito`;
 const LOCAL_STORAGE_KEY = "carrito_invitado";
 
 const getLoggedUser = async () => {

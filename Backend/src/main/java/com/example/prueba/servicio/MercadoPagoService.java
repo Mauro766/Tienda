@@ -13,6 +13,7 @@ import com.mercadopago.resources.preference.Preference;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,12 @@ import org.slf4j.LoggerFactory;
 @Service
 public class MercadoPagoService {
     private static final Logger logger = LoggerFactory.getLogger(MercadoPagoService.class);
+
+    private final String backendUrl;
+
+    public MercadoPagoService(@Value("${app.backend.url:http://localhost:8081}") String backendUrl) {
+        this.backendUrl = backendUrl.replaceAll("/+$", "");
+    }
 
     public String crearPreferencia(Pedido pedido) throws MPException, MPApiException {
         if (pedido == null || pedido.getItems() == null || pedido.getItems().isEmpty()) {
@@ -52,9 +59,9 @@ public class MercadoPagoService {
                 .externalReference(String.valueOf(pedido.getId()))
                 .backUrls(
                         PreferenceBackUrlsRequest.builder()
-                                .success("http://localhost:8081/pagos/success")
-                                .failure("http://localhost:8081/pagos/failure")
-                                .pending("http://localhost:8081/pagos/pending")
+                                .success(backendUrl + "/pagos/success")
+                                .failure(backendUrl + "/pagos/failure")
+                                .pending(backendUrl + "/pagos/pending")
                                 .build())
                 .build();
 

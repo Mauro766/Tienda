@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trash2, EyeOff, Loader2, AlertCircle, Package, Search, AlertTriangle } from "lucide-react";
 import { getProductosAdmin, desactivarProducto, eliminarProducto } from "../../services/RopaService";
+import { formatImageUrl } from "../../config";
 
 function EliminarProducto() {
   const [productos, setProductos] = useState([]);
@@ -98,13 +99,7 @@ function EliminarProducto() {
                 <div className="admin-list-left">
                   <img
                     className="admin-list-thumb"
-                    src={
-                      p.imagenesUrl?.[0]
-                        ? p.imagenesUrl[0].startsWith("http")
-                          ? p.imagenesUrl[0]
-                          : `http://localhost:8081${p.imagenesUrl[0]}`
-                        : "/Campera.jpg"
-                    }
+                    src={formatImageUrl(p.imagenesUrl?.[0], "/Campera.jpg")}
                     alt={p.nombre}
                   />
                   <div>
