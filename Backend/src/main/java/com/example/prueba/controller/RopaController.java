@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.example.prueba.dto.RopaCreateDTO;
 import com.example.prueba.dto.RopaDTO;
 import com.example.prueba.dto.RopaUpdateDTO;
@@ -99,16 +98,20 @@ public class RopaController {
         return ropaService.buscarPorId(id);
     }
 
-    // 🔹 Actualizar (PUT)
+  
+    // Actualizar producto y gestionar sus imágenes
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public RopaDTO actualizar(
             @PathVariable Long id,
             @Valid @RequestPart("ropa") RopaUpdateDTO dto,
-            @RequestPart(value = "imagenes", required = false) List<MultipartFile> imagenes) throws Exception {
+            @RequestPart(value = "imagenes", required = false) List<MultipartFile> imagenes,
+            @RequestParam(value = "modoImagen", required = false, defaultValue = "reemplazar") String modoImagen
+    ) throws Exception {
 
-        return ropaService.actualizar(id, dto, imagenes);
+        return ropaService.actualizar(id, dto, imagenes, modoImagen);
     }
+
 
     // 🔹 desactivar ropa
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")

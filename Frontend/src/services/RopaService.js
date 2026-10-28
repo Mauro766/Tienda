@@ -69,15 +69,31 @@ export const getProductoById = async (id) => {
   return res.json();
 };
 
-export const actualizarProducto = async (id, producto, imagenes) => {
+
+export const actualizarProducto = async (
+  id,
+  producto,
+  imagenes,
+  modoImagen = "reemplazar"
+) => {
   const formData = new FormData();
-  formData.append("ropa", new Blob([JSON.stringify(producto)], { type: "application/json" }));
-  
+
+  formData.append(
+    "ropa",
+    new Blob([JSON.stringify(producto)], {
+      type: "application/json",
+    })
+  );
+
   if (imagenes && imagenes.length > 0) {
-    imagenes.forEach(img => {
-      formData.append("imagenes", img);
+    imagenes.forEach((img) => {
+      if (img instanceof File || img instanceof Blob) {
+        formData.append("imagenes", img);
+      }
     });
   }
+
+  formData.append("modoImagen", modoImagen);
 
   const res = await fetch(`${API_URL}/${id}`, {
     method: "PUT",
@@ -86,11 +102,14 @@ export const actualizarProducto = async (id, producto, imagenes) => {
   });
 
   if (!res.ok) {
-    throw new Error("Error actualizando producto");
+    throw new Error(
+      await getErrorMessage(res, "Error actualizando producto")
+    );
   }
 
   return res.json();
 };
+
 
 export const desactivarProducto = async (id) => {
   const res = await fetch(`${API_URL}/desactivar/${id}`, {

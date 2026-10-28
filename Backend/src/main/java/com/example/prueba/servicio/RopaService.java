@@ -63,14 +63,31 @@ public class RopaService {
         }
     }
 
-    private void agregarPrefijoImagenes(RopaDTO dto) {
-        if (dto.getImagenesUrl() != null && !dto.getImagenesUrl().isEmpty()) {
-            dto.setImagenesUrl(
-                    dto.getImagenesUrl().stream()
-                            .map(img -> URL_BASE + img)
-                            .collect(Collectors.toList()));
-        }
+    
+private String resolverUrlImagen(String imagen) {
+    if (imagen == null || imagen.isBlank()) {
+        return imagen;
     }
+
+    // Las imágenes nuevas ya tienen URL completa.
+    if (imagen.startsWith("https://") || imagen.startsWith("http://")) {
+        return imagen;
+    }
+
+    // Compatibilidad con las imágenes antiguas.
+    return URL_BASE + imagen;
+}
+
+private void agregarPrefijoImagenes(RopaDTO dto) {
+    if (dto.getImagenesUrl() != null) {
+        dto.setImagenesUrl(
+                dto.getImagenesUrl().stream()
+                        .map(this::resolverUrlImagen)
+                        .collect(Collectors.toList())
+        );
+    }
+}
+
 
     // Crear ropa
     public RopaDTO crear(RopaCreateDTO dto, List<MultipartFile> imagenes) throws Exception {
@@ -158,53 +175,102 @@ public class RopaService {
     }
 
     // Actualizar producto
-    public RopaDTO actualizar(
-            Long id,
-            RopaUpdateDTO dto,
-            List<MultipartFile> imagenes) throws Exception {
+   
+@Transactional
+public RopaDTO actualizar(
+        Long id,
+        RopaUpdateDTO dto,
+        List<MultipartFile> imagenes,
+        String modoImagen) throws Exception {
 
-        Ropa ropa = ropaRepository.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Ropa no encontrada"));
+    Ropa ropa = ropaRepository.findById(id)
+            .orElseThrow(() ->
+                    new RecursoNoEncontradoException("Ropa no encontrada"));
 
-        ropa.setNombre(dto.getNombre());
-        ropa.setDescripcion(dto.getDescripcion());
-        ropa.setPrecio(dto.getPrecio());
-        ropa.setStock(dto.getStock());
-        ropa.setCategoria(dto.getCategoria());
-        ropa.setMarca(dto.getMarca());
-        ropa.setColor(dto.getColor());
+    ropa.setNombre(dto.getNombre());
+    ropa.setDescripcion(dto.getDescripcion());
+    ropa.setPrecio(dto.getPrecio());
+    ropa.setStock(dto.getStock());
+    ropa.setCategoria(dto.getCategoria());
+    ropa.setMarca(dto.getMarca());
+    ropa.setColor(dto.getColor());
 
-        if (dto.getTallas() != null) {
-            asignarTallas(ropa, dto.getTallas());
-        }
+    if (dto.getTallas() != null) {
+        asignarTallas(ropa, dto.getTallas());
+    }
 
-        if (dto.getActivo() != null) {
-            ropa.setActivo(dto.getActivo());
-        }
+    if (dto.getActivo() != null) {
+        ropa.setActivo(dto.getActivo());
+    }
 
-        // Reemplazar las imágenes solo si llegan archivos válidos.
-        if (imagenes != null && !imagenes.isEmpty()) {
+    List<MultipartFile> archivos = imagenes == null
+            ? new ArrayList<>()
+            : imagenes.stream()
+                    .filter(img -> img != null && !img.isEmpty())
+                    .collect(Collectors.toList());
 
-            List<String> nombres = new ArrayList<>();
+   
+if (!archivos.isEmpty()) {
+    List<String> anteriores = ropa.getImagenesUrl().stream()
+            .map(RopaImagen::getImagenUrl)
+            .collect(Collectors.toList());
 
-            for (MultipartFile img : imagenes) {
-                if (img != null && !img.isEmpty()) {
-                    nombres.add(storageService.guardarArchivo(img));
+    List<String> nuevas = new ArrayList<>();
+
+    for (MultipartFile archivo : archivos) {
+        nuevas.add(storageService.guardarArchivo(archivo));
+    }
+
+    if ("agregar".equalsIgnoreCase(modoImagen)) {
+        anteriores.addAll(nuevas);
+        asignarImagenes(ropa, anteriores);
+
+    } else if ("reemplazar".equalsIgnoreCase(modoImagen)) {
+        asignarImagenes(ropa, nuevas);
+
+    } else {
+        throw new IllegalArgumentException(
+                "El modo de imagen debe ser 'agregar' o 'reemplazar'");
+    }
+
+    Ropa actualizada = ropaRepository.saveAndFlush(ropa);
+
+    // Al reemplazar, limpiar las imágenes anteriores de Cloudinary.
+    if ("reemplazar".equalsIgnoreCase(modoImagen)) {
+        for (String urlAntigua : anteriores) {
+            if (urlAntigua == null
+                    || urlAntigua.isBlank()
+                    || nuevas.contains(urlAntigua)) {
+                continue;
+            }
+
+            if (urlAntigua.startsWith("https://res.cloudinary.com/")
+                    || urlAntigua.startsWith("http://res.cloudinary.com/")) {
+                try {
+                    storageService.eliminarImagenCloudinary(urlAntigua);
+                } catch (Exception e) {
+                    System.err.println(
+                            "No se pudo eliminar la imagen antigua de Cloudinary: "
+                                    + urlAntigua + ". Error: " + e.getMessage());
                 }
             }
-
-            if (!nombres.isEmpty()) {
-                asignarImagenes(ropa, nombres);
-            }
         }
-
-        Ropa actualizada = ropaRepository.save(ropa);
-
-        RopaDTO respuesta = RopaMapper.toDTO(actualizada);
-        agregarPrefijoImagenes(respuesta);
-
-        return respuesta;
     }
+
+    RopaDTO respuesta = RopaMapper.toDTO(actualizada);
+    agregarPrefijoImagenes(respuesta);
+    return respuesta;
+}
+
+
+    Ropa actualizada = ropaRepository.saveAndFlush(ropa);
+
+    RopaDTO respuesta = RopaMapper.toDTO(actualizada);
+    agregarPrefijoImagenes(respuesta);
+
+    return respuesta;
+}
+
 
     // Reemplazar todas las imágenes del producto
     @Transactional
@@ -237,19 +303,35 @@ public class RopaService {
         Ropa actualizada = ropaRepository.saveAndFlush(ropa);
 
         // Eliminar los archivos antiguos solo si ya no están referenciados.
-        for (String nombre : imagenesViejas) {
-            if (nombre == null || nombre.isBlank() || nuevas.contains(nombre)) {
-                continue;
-            }
+      
 
-            Path rutaVieja = storageService.resolverArchivo(nombre);
+for (String nombre : imagenesViejas) {
+    if (nombre == null || nombre.isBlank() || nuevas.contains(nombre)) {
+        continue;
+    }
 
-            try {
-                Files.deleteIfExists(rutaVieja);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    try {
+        if (nombre.startsWith("https://res.cloudinary.com/")
+                || nombre.startsWith("http://res.cloudinary.com/")) {
+
+            storageService.eliminarImagenCloudinary(nombre);
+
+        } else {
+            String nombreArchivo = nombre.startsWith(URL_BASE)
+                    ? nombre.substring(URL_BASE.length())
+                    : nombre;
+
+            Path rutaVieja = storageService.resolverArchivo(nombreArchivo);
+            Files.deleteIfExists(rutaVieja);
         }
+    } catch (Exception e) {
+        System.err.println(
+                "No se pudo limpiar la imagen antigua: "
+                + nombre + ". Error: " + e.getMessage());
+    }
+}
+
+
 
         RopaDTO respuesta = RopaMapper.toDTO(actualizada);
         agregarPrefijoImagenes(respuesta);
@@ -283,46 +365,66 @@ public class RopaService {
     }
 
     // Eliminar producto
-    @Transactional
-    public void eliminar(Long id) {
+    
+@Transactional
+public void eliminar(Long id) {
 
-        Ropa ropa = ropaRepository.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Ropa no encontrada"));
+    Ropa ropa = ropaRepository.findById(id)
+            .orElseThrow(() ->
+                    new RecursoNoEncontradoException("Ropa no encontrada"));
 
-        if (pedidoItemRepository.existsByProductoId(id)) {
-            throw new IllegalStateException(
-                    "No se puede eliminar este producto porque ya forma parte de pedidos registrados. Puedes ocultarlo desde el panel admin.");
+    if (pedidoItemRepository.existsByProductoId(id)) {
+        throw new IllegalStateException(
+                "No se puede eliminar este producto porque ya forma parte "
+                + "de pedidos registrados. Puedes ocultarlo desde el panel admin.");
+    }
+
+    List<String> imagenes = ropa.getImagenesUrl() == null
+            ? new ArrayList<>()
+            : ropa.getImagenesUrl().stream()
+                    .map(RopaImagen::getImagenUrl)
+                    .collect(Collectors.toList());
+
+    carritoItemRepository.deleteByProductoId(id);
+
+    ropaRepository.delete(ropa);
+    ropaRepository.flush();
+
+    // Limpiar las imágenes después de eliminar correctamente el producto.
+    for (String imagen : imagenes) {
+        if (imagen == null || imagen.isBlank()) {
+            continue;
         }
 
-        carritoItemRepository.deleteByProductoId(id);
-
-        List<String> imagenes = ropa.getImagenesUrl() == null
-                ? new ArrayList<>()
-                : ropa.getImagenesUrl().stream()
-                        .map(RopaImagen::getImagenUrl)
-                        .collect(Collectors.toList());
-
-        ropaRepository.delete(ropa);
-        ropaRepository.flush();
-
-        for (String imgUrl : imagenes) {
-            if (imgUrl == null || imgUrl.isBlank()) {
-                continue;
+        if (imagen.startsWith("https://res.cloudinary.com/")
+                || imagen.startsWith("http://res.cloudinary.com/")) {
+            try {
+                storageService.eliminarImagenCloudinary(imagen);
+            } catch (Exception e) {
+                // El producto ya fue eliminado. Registrar el error
+                // para poder limpiar la imagen posteriormente.
+                System.err.println(
+                        "No se pudo eliminar la imagen de Cloudinary: "
+                        + imagen + ". Error: " + e.getMessage());
             }
 
-            String nombreArchivo = imgUrl.startsWith(URL_BASE)
-                    ? imgUrl.substring(URL_BASE.length())
-                    : imgUrl;
-
-            Path ruta = storageService.resolverArchivo(nombreArchivo);
+        } else {
+            String nombreArchivo = imagen.startsWith(URL_BASE)
+                    ? imagen.substring(URL_BASE.length())
+                    : imagen;
 
             try {
+                Path ruta = storageService.resolverArchivo(nombreArchivo);
                 Files.deleteIfExists(ruta);
             } catch (IOException e) {
-                e.printStackTrace();
+                System.err.println(
+                        "No se pudo eliminar la imagen local: "
+                        + nombreArchivo + ". Error: " + e.getMessage());
             }
         }
     }
+}
+
 
     public void desactivar(Long id) {
         Ropa ropa = ropaRepository.findById(id)
@@ -349,14 +451,17 @@ public class RopaService {
                 .map(RopaMapper::toDTO)
                 .collect(Collectors.toList());
 
-        lista.forEach(r -> {
-            if (r.getImagenesUrl() != null && !r.getImagenesUrl().isEmpty()) {
-                r.setImagenesUrl(
-                        r.getImagenesUrl().stream()
-                                .map(img -> URL_BASE + img)
-                                .collect(Collectors.toList()));
-            }
-        });
+     
+lista.forEach(r -> {
+    if (r.getImagenesUrl() != null) {
+        r.setImagenesUrl(
+                r.getImagenesUrl().stream()
+                        .map(this::resolverUrlImagen)
+                        .collect(Collectors.toList())
+        );
+    }
+});
+
 
         return lista;
     }

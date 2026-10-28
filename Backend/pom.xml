@@ -133,6 +133,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Cloudinary: almacenamiento de imágenes -->
+<dependency>
+    <groupId>com.cloudinary</groupId>
+    <artifactId>cloudinary-http5</artifactId>
+    <version>2.1.0</version>
+</dependency>
+
     </dependencies>
 
     <build>

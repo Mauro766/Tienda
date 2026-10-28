@@ -27,7 +27,8 @@ function EditarProducto() {
     color: "",
     descripcion: "",
   });
-  const [image, setImage] = useState(null);
+  const [images, setImages] = useState([]);
+  const [imageMode, setImageMode] = useState("add");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -89,7 +90,8 @@ function EditarProducto() {
         color: producto.color || "",
         descripcion: producto.descripcion || "",
       });
-      setImage(null);
+      setImages([]);
+      setImageMode("add");
       setSuccess(null);
       setError(null);
     } catch (_err) {
@@ -100,9 +102,15 @@ function EditarProducto() {
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
+    const files = Array.from(e.target.files || []);
+
+    if (imageMode === "replace") {
+      setImages(files);
+    } else {
+      setImages((prev) => [...prev, ...files]);
     }
+
+    e.target.value = "";
   };
 
   const handleCategoriaKeyDown = async (e) => {
@@ -166,7 +174,13 @@ function EditarProducto() {
         activo: true,
       };
 
-      await actualizarProducto(selectedProducto.id, dto, image ? [image] : null);
+      await actualizarProducto(
+        selectedProducto.id,
+        dto,
+        images,
+        imageMode === "add" ? "agregar" : "reemplazar"
+      );
+      
       setSuccess("Producto actualizado con exito.");
 
       const data = await getProductosAdmin();
@@ -214,195 +228,275 @@ function EditarProducto() {
 
       {!selectedProducto ? (
         <div>
-            <div className="admin-search">
-              <Search size={18} />
-              <input
-                type="text"
-                placeholder="Buscar por nombre o categoria"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+          <div className="admin-search">
+            <Search size={18} />
+            <input
+              type="text"
+              placeholder="Buscar por nombre o categoria"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          {filteredProductos.length === 0 ? (
+            <div className="admin-empty">
+              <Package size={40} />
+              <p>No se encontraron productos.</p>
+            </div>
+          ) : (
+            <div className="admin-list">
+              {filteredProductos.map((p) => (
+                <article key={p.id} className="admin-list-item">
+                  <div className="admin-list-left">
+                    <img
+                      className="admin-list-thumb"
+                      src={formatImageUrl(p.imagenesUrl?.[0], "/Campera.jpg")}
+                      alt={p.nombre}
+                    />
+                    <div>
+                      <h3 className="admin-list-title">{p.nombre}</h3>
+                      <p className="admin-list-meta">
+                        {p.categoria} | ${p.precio}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="admin-actions">
+                    <button onClick={() => handleSelectProducto(p.id)} className="admin-btn admin-btn-primary" title="Editar">
+                      <Edit3 size={16} /> Editar
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <form
+          key="form"
+          onSubmit={handleSubmit}
+          className="admin-form"
+        >
+          <div className="admin-form-grid">
+            <div className="admin-field">
+              <label htmlFor="nombre">Nombre</label>
+              <input id="nombre" type="text" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} />
             </div>
 
-            {filteredProductos.length === 0 ? (
-              <div className="admin-empty">
-                <Package size={40} />
-                <p>No se encontraron productos.</p>
-              </div>
-            ) : (
-              <div className="admin-list">
-                {filteredProductos.map((p) => (
-                  <article key={p.id} className="admin-list-item">
-                    <div className="admin-list-left">
-                      <img
-                        className="admin-list-thumb"
-                        src={formatImageUrl(p.imagenesUrl?.[0], "/Campera.jpg")}
-                        alt={p.nombre}
-                      />
-                      <div>
-                        <h3 className="admin-list-title">{p.nombre}</h3>
-                        <p className="admin-list-meta">
-                          {p.categoria} | ${p.precio}
-                        </p>
-                      </div>
-                    </div>
+            <div className="admin-field">
+              <label htmlFor="precio">Precio</label>
+              <input id="precio" type="number" value={formData.precio} onChange={(e) => setFormData({ ...formData, precio: e.target.value })} />
+            </div>
 
-                    <div className="admin-actions">
-                      <button onClick={() => handleSelectProducto(p.id)} className="admin-btn admin-btn-primary" title="Editar">
-                        <Edit3 size={16} /> Editar
-                      </button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <form
-            key="form"
-            onSubmit={handleSubmit}
-            className="admin-form"
-          >
-            <div className="admin-form-grid">
-              <div className="admin-field">
-                <label htmlFor="nombre">Nombre</label>
-                <input id="nombre" type="text" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} />
-              </div>
+            <div className="admin-field">
+              <label htmlFor="stock">Stock</label>
+              <input id="stock" type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
+            </div>
 
-              <div className="admin-field">
-                <label htmlFor="precio">Precio</label>
-                <input id="precio" type="number" value={formData.precio} onChange={(e) => setFormData({ ...formData, precio: e.target.value })} />
-              </div>
-
-              <div className="admin-field">
-                <label htmlFor="stock">Stock</label>
-                <input id="stock" type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
-              </div>
-
-              {/* Selector y creador dinamico de categorias */}
-              <div className="admin-field">
-                <label htmlFor="categoria">Categoria</label>
-                <div className="admin-cat-container">
-                  <input
-                    id="categoria"
-                    type="text"
-                    placeholder="Remeras, Camperas (Enter para nueva)"
-                    value={formData.categoria}
-                    onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                    onFocus={() => setShowCatDropdown(true)}
-                    onBlur={() => setTimeout(() => setShowCatDropdown(false), 180)}
-                    onKeyDown={handleCategoriaKeyDown}
-                    required
-                    disabled={creatingCat}
-                  />
-                  {showCatDropdown && (
-                    <ul className="admin-cat-dropdown">
-                      {categorias
-                        .filter((c) => c.nombre.toLowerCase().includes((formData.categoria || "").toLowerCase()))
-                        .map((c) => (
-                          <li
-                            key={c.id}
-                            className={`admin-cat-item ${formData.categoria.toLowerCase() === c.nombre.toLowerCase() ? "selected" : ""}`}
-                            onMouseDown={() => {
-                              setFormData((prev) => ({ ...prev, categoria: c.nombre }));
-                              setShowCatDropdown(false);
-                            }}
-                          >
-                            <span>{c.nombre}</span>
-                          </li>
-                        ))}
-                      {formData.categoria && !categorias.some((c) => c.nombre.toLowerCase() === formData.categoria.trim().toLowerCase()) && (
+            {/* Selector y creador dinamico de categorias */}
+            <div className="admin-field">
+              <label htmlFor="categoria">Categoria</label>
+              <div className="admin-cat-container">
+                <input
+                  id="categoria"
+                  type="text"
+                  placeholder="Remeras, Camperas (Enter para nueva)"
+                  value={formData.categoria}
+                  onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
+                  onFocus={() => setShowCatDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowCatDropdown(false), 180)}
+                  onKeyDown={handleCategoriaKeyDown}
+                  required
+                  disabled={creatingCat}
+                />
+                {showCatDropdown && (
+                  <ul className="admin-cat-dropdown">
+                    {categorias
+                      .filter((c) => c.nombre.toLowerCase().includes((formData.categoria || "").toLowerCase()))
+                      .map((c) => (
                         <li
-                          className="admin-cat-item admin-cat-item-new"
-                          onMouseDown={async () => {
-                            const val = formData.categoria.trim();
-                            if (!val) return;
-                            setCreatingCat(true);
-                            try {
-                              const nueva = await crearCategoria(val);
-                              setCategorias((prev) => [...prev, nueva]);
-                              setFormData((prev) => ({ ...prev, categoria: nueva.nombre }));
-                              setSuccess(`Categoria "${nueva.nombre}" guardada en la base de datos.`);
-                            } catch (err) {
-                              setError("No se pudo guardar la categoria en la base de datos.");
-                            } finally {
-                              setCreatingCat(false);
-                            }
+                          key={c.id}
+                          className={`admin-cat-item ${formData.categoria.toLowerCase() === c.nombre.toLowerCase() ? "selected" : ""}`}
+                          onMouseDown={() => {
+                            setFormData((prev) => ({ ...prev, categoria: c.nombre }));
+                            setShowCatDropdown(false);
                           }}
                         >
-                          <span>+ Crear y elegir "{formData.categoria}"</span>
+                          <span>{c.nombre}</span>
                         </li>
-                      )}
-                    </ul>
-                  )}
-                </div>
-              </div>
-
-              <div className="admin-field">
-                <label htmlFor="talles">Tallas</label>
-                <input id="talles" type="text" value={formData.talles} onChange={(e) => setFormData({ ...formData, talles: e.target.value })} placeholder="S, M, L" />
-              </div>
-
-              <div className="admin-field">
-                <label htmlFor="color">Color</label>
-                <input id="color" type="text" value={formData.color} onChange={(e) => setFormData({ ...formData, color: e.target.value })} />
-              </div>
-
-              <div className="admin-field admin-field-full">
-                <label htmlFor="descripcion">Descripcion</label>
-                <textarea id="descripcion" rows="4" value={formData.descripcion} onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })} />
+                      ))}
+                    {formData.categoria && !categorias.some((c) => c.nombre.toLowerCase() === formData.categoria.trim().toLowerCase()) && (
+                      <li
+                        className="admin-cat-item admin-cat-item-new"
+                        onMouseDown={async () => {
+                          const val = formData.categoria.trim();
+                          if (!val) return;
+                          setCreatingCat(true);
+                          try {
+                            const nueva = await crearCategoria(val);
+                            setCategorias((prev) => [...prev, nueva]);
+                            setFormData((prev) => ({ ...prev, categoria: nueva.nombre }));
+                            setSuccess(`Categoria "${nueva.nombre}" guardada en la base de datos.`);
+                          } catch (err) {
+                            setError("No se pudo guardar la categoria en la base de datos.");
+                          } finally {
+                            setCreatingCat(false);
+                          }
+                        }}
+                      >
+                        <span>+ Crear y elegir "{formData.categoria}"</span>
+                      </li>
+                    )}
+                  </ul>
+                )}
               </div>
             </div>
 
             <div className="admin-field">
-              <label htmlFor="imagen">Imagen</label>
-              <div className="admin-list-item">
-                <div className="admin-list-left">
-                  <img
-                    className="admin-list-thumb"
-                    src={
-                      image
-                        ? URL.createObjectURL(image)
-                        : formatImageUrl(selectedProducto.imagenesUrl?.[0], "/Campera.jpg")
-                    }
-                    alt="Preview"
-                  />
-                  <div>
-                    <p className="admin-list-title">Cambiar imagen principal</p>
-                    <p className="admin-list-meta">Sube una nueva foto para reemplazar la actual.</p>
-                  </div>
-                </div>
+              <label htmlFor="talles">Tallas</label>
+              <input id="talles" type="text" value={formData.talles} onChange={(e) => setFormData({ ...formData, talles: e.target.value })} placeholder="S, M, L" />
+            </div>
+
+            <div className="admin-field">
+              <label htmlFor="color">Color</label>
+              <input id="color" type="text" value={formData.color} onChange={(e) => setFormData({ ...formData, color: e.target.value })} />
+            </div>
+
+
+            <div className="admin-field admin-field-full">
+              <label>Imágenes del producto</label>
+
+              <div className="admin-field">
+                <label>¿Qué querés hacer?</label>
 
                 <div className="admin-actions">
-                  <label className="admin-btn admin-btn-neutral" htmlFor="imagen">
-                    <ImageIcon size={16} /> Seleccionar
-                  </label>
-                  <input id="imagen" type="file" accept="image/*" onChange={handleFileChange} style={{ display: "none" }} />
+                  <button
+                    type="button"
+                    className={`admin-btn ${imageMode === "add"
+                      ? "admin-btn-primary"
+                      : "admin-btn-neutral"
+                      }`}
+                    onClick={() => {
+                      setImageMode("add");
+                      setImages([]);
+                    }}
+                  >
+                    Agregar imágenes
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`admin-btn ${imageMode === "replace"
+                      ? "admin-btn-primary"
+                      : "admin-btn-neutral"
+                      }`}
+                    onClick={() => {
+                      setImageMode("replace");
+                      setImages([]);
+                    }}
+                  >
+                    Reemplazar todas
+                  </button>
                 </div>
+
+                <p className="admin-list-meta">
+                  {imageMode === "add"
+                    ? "Las imágenes nuevas se sumarán a las actuales."
+                    : "Las imágenes actuales serán reemplazadas por las nuevas."}
+                </p>
+              </div>
+
+              <div className="admin-actions">
+                <label
+                  className="admin-btn admin-btn-neutral"
+                  htmlFor="imagenes"
+                >
+                  <ImageIcon size={16} />
+                  Seleccionar imágenes
+                </label>
+
+                <input
+                  id="imagenes"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileChange}
+                  style={{ display: "none" }}
+                />
+              </div>
+
+              <div className="admin-list" style={{ marginTop: 16 }}>
+                {imageMode === "add" &&
+                  (selectedProducto.imagenesUrl || []).map((url, index) => (
+                    <article key={`actual-${index}`} className="admin-list-item">
+                      <div className="admin-list-left">
+                        <img
+                          className="admin-list-thumb"
+                          src={formatImageUrl(url, "/Campera.jpg")}
+                          alt={`Imagen actual ${index + 1}`}
+                        />
+                        <p className="admin-list-meta">Imagen actual</p>
+                      </div>
+                    </article>
+                  ))}
+
+                {images.map((file, index) => (
+                  <article
+                    key={`${file.name}-${index}`}
+                    className="admin-list-item"
+                  >
+                    <div className="admin-list-left">
+                      <img
+                        className="admin-list-thumb"
+                        src={URL.createObjectURL(file)}
+                        alt={`Imagen nueva ${index + 1}`}
+                      />
+                      <div>
+                        <p className="admin-list-title">{file.name}</p>
+                        <p className="admin-list-meta">
+                          {imageMode === "add" ? "Se agregará" : "Reemplazará las actuales"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-neutral"
+                      onClick={() =>
+                        setImages((prev) => prev.filter((_, i) => i !== index))
+                      }
+                    >
+                      Quitar
+                    </button>
+                  </article>
+                ))}
               </div>
             </div>
 
-            <>
-              {success && (
-                <div className="admin-alert admin-alert-success">
-                  <CheckCircle2 size={18} />
-                  <span>{success}</span>
-                </div>
-              )}
-              {error && (
-                <div className="admin-alert admin-alert-error">
-                  <AlertCircle size={18} />
-                  <span>{error}</span>
-                </div>
-              )}
-            </>
+          </div>
 
-            <button type="submit" disabled={submitting} className="admin-submit">
-              {submitting ? <Loader2 className="spin-icon" size={18} /> : <Save size={18} />}
-              {submitting ? "Actualizando..." : "Guardar cambios"}
-            </button>
-          </form>
-        )}
+
+          <>
+            {success && (
+              <div className="admin-alert admin-alert-success">
+                <CheckCircle2 size={18} />
+                <span>{success}</span>
+              </div>
+            )}
+            {error && (
+              <div className="admin-alert admin-alert-error">
+                <AlertCircle size={18} />
+                <span>{error}</span>
+              </div>
+            )}
+          </>
+
+          <button type="submit" disabled={submitting} className="admin-submit">
+            {submitting ? <Loader2 className="spin-icon" size={18} /> : <Save size={18} />}
+            {submitting ? "Actualizando..." : "Guardar cambios"}
+          </button>
+        </form>
+      )}
     </section>
   );
 }
