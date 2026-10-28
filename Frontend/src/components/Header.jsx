@@ -15,6 +15,7 @@ function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const pathname = location.pathname.toLowerCase();
+  const isHome = pathname === "/";
   const forceVisibleHeader = pathname !== "/";
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
@@ -127,7 +128,7 @@ function Header() {
       {/* ===== MOBILE TOP BAR ===== */}
       <div className="mobile-top-bar">
         <Link viewTransition to="/" className="mtb-logo-link">
-        <h3>DealPush|Muestra</h3>
+        <h3>DealPush</h3>
         </Link>
 
         <div className="mobile-top-actions">
@@ -178,10 +179,12 @@ function Header() {
       )}
 
       {/* ===== DESKTOP HEADER ===== */}
-      <header className={`header ${scrolled || shopHover || searchOpen || forceVisibleHeader ? "scrolled" : ""}`}>
+      <header className={`header ${scrolled || shopHover || searchOpen || forceVisibleHeader ? "scrolled" : ""} ${isHome ? "header--home" : ""}`}>
         <div className="principal">
           <div className="header-left">
-            <Link viewTransition to="/"><h3>DealPush|Muestra</h3></Link>
+            <Link viewTransition to="/" aria-label="DealPush, inicio">
+              <img className="header-brand-mark" src="/DP_logo.svg" alt="" />
+            </Link>
           </div>
 
           <nav className="header-center">
@@ -193,7 +196,6 @@ function Header() {
             >
               <a className="shop" href="#">Shop</a>
             </div>
-            <a href="#">Local</a>
           </nav>
 
           <div className="header-right">
@@ -213,7 +215,7 @@ function Header() {
             )}
 
             {user ? (
-              <button className="hdr-user-pill" onClick={handleLogout}>
+              <button className="hdr-user-pill" onClick={handleLogout} aria-label={`Cerrar sesión de ${user.username}`}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 <span>{user.username}</span>
               </button>

@@ -1,68 +1,40 @@
+import "../styles/hero.css";
+
+const heroImages = [  { src: "/card-hero/img04.svg",dark:"/card-hero/img04-dark.jpg", alt: "Modelo con saco azul de frente" },
+  { src: "/card-hero/img02.svg",dark:"/card-hero/img02-dark.jpg", alt: "Vista trasera de un saco azul" },
+
+  { src: "/card-hero/img01.svg",dark:"/card-hero/img01-dark.jpg", alt: "Modelo con saco azul de perfil" },
+  { src: "/card-hero/img03.svg", dark:"/card-hero/img03-dark.jpg",alt: "Reloj con correa de cuero" },
+];
+
 function Hero() {
   return (
-    <section className="hero">
-      {/*<img className="hero-img" src="/banner.png" alt="Coleccion principal de temporada" />*/}
-      <div className="hero-img"></div>
+    <section className="hero" aria-label="Colección destacada DealPush">
+      <svg className="hero-wordmark" width="1108" height="181" viewBox="0 0 1108 181" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M69.75 2.74999C88.25 2.74999 104.417 6.49999 118.25 14C132.25 21.3333 143 31.6667 150.5 45C158 58.3333 161.75 73.5833 161.75 90.75C161.75 107.75 157.917 122.917 150.25 136.25C142.75 149.583 132 160.083 118 167.75C104.167 175.25 88.0833 179 69.75 179H0V2.74999H69.75ZM66 135.75C80.3333 135.75 91.5833 131.833 99.75 124C107.917 116.167 112 105.083 112 90.75C112 76.25 107.917 65.0833 99.75 57.25C91.5833 49.25 80.3333 45.25 66 45.25H49V135.75H66ZM207.838 42V70.75H264.088V108H207.838V139.75H271.588V179H158.838V2.74999H271.588V42H207.838ZM382.301 150.25H319.801L310.301 179H258.801L323.051 2.74999H379.551L443.551 179H391.801L382.301 150.25ZM370.051 112.75L351.051 55.75L332.301 112.75H370.051ZM483.521 141.5H538.271V179H434.521V2.74999H483.521V141.5Z" fill="black" />
+        <path d="M671.574 61.5C671.574 72.1667 669.074 81.9167 664.074 90.75C659.241 99.4167 651.824 106.417 641.824 111.75C631.991 116.917 619.908 119.5 605.574 119.5H581.324V179H532.324V2.74999H605.574C619.741 2.74999 631.741 5.24999 641.574 10.25C651.574 15.25 659.074 22.1667 664.074 31C669.074 39.8333 671.574 50 671.574 61.5ZM600.824 80.5C614.658 80.5 621.574 74.1667 621.574 61.5C621.574 48.6667 614.658 42.25 600.824 42.25H581.324V80.5H600.824ZM714.26 2.74999V105C714.26 114.5 716.426 121.833 720.76 127C725.26 132.167 732.01 134.75 741.01 134.75C750.01 134.75 756.76 132.167 761.26 127C765.926 121.667 768.26 114.333 768.26 105V2.74999H817.26V105C817.26 121.167 813.843 135 807.01 146.5C800.176 157.833 790.843 166.417 779.01 172.25C767.343 177.917 754.343 180.75 740.01 180.75C725.676 180.75 712.843 177.917 701.51 172.25C690.343 166.417 681.51 157.833 675.01 146.5C668.676 135.167 665.51 121.333 665.51 105V2.74999H714.26ZM885.738 180.75C865.238 180.75 848.405 175.917 835.238 166.25C822.072 156.417 814.988 142.417 813.988 124.25H866.238C866.738 130.417 868.572 134.917 871.738 137.75C874.905 140.583 878.988 142 883.988 142C888.488 142 892.155 140.917 894.988 138.75C897.988 136.417 899.488 133.25 899.488 129.25C899.488 124.083 897.072 120.083 892.238 117.25C887.405 114.417 879.572 111.25 868.738 107.75C857.238 103.917 847.905 100.25 840.738 96.75C833.738 93.0833 827.572 87.8333 822.238 81C817.072 74 814.488 64.9167 814.488 53.75C814.488 42.4167 817.322 32.75 822.988 24.75C828.655 16.5833 836.488 10.4167 846.488 6.24999C856.488 2.08332 867.822 -3.8147e-06 880.488 -3.8147e-06C900.988 -3.8147e-06 917.322 4.83332 929.488 14.5C941.822 24 948.405 37.4167 949.238 54.75H895.988C895.822 49.4167 894.155 45.4167 890.988 42.75C887.988 40.0833 884.072 38.75 879.238 38.75C875.572 38.75 872.572 39.8333 870.238 42C867.905 44.1667 866.738 47.25 866.738 51.25C866.738 54.5833 867.988 57.5 870.488 60C873.155 62.3333 876.405 64.4167 880.238 66.25C884.072 67.9167 889.738 70.0833 897.238 72.75C908.405 76.5833 917.572 80.4167 924.738 84.25C932.072 87.9167 938.322 93.1667 943.488 100C948.822 106.667 951.488 115.167 951.488 125.5C951.488 136 948.822 145.417 943.488 153.75C938.322 162.083 930.738 168.667 920.738 173.5C910.905 178.333 899.238 180.75 885.738 180.75ZM1107.02 2.74999V179H1058.02V108.25H998.268V179H949.268V2.74999H998.268V69H1058.02V2.74999H1107.02Z" fill="#FF0000" />
+      </svg>
 
-      <div className="hero-overlay" />
-      <div className="hero-vignette" />
-
-      <div className="home-bann">
-        <img src="/Campera/c1.png" alt="" />
-        <img src="/Campera/c2.png" alt="" />
-        <img src="/Campera/c3.png" alt="" />
-
-      </div>
-
-      <div className="hero-content">
-        <p className="hero-eyebrow">Nueva temporada 2026</p>
-        <h1 className="hero-title">Sentirse comodo <br /> y bien</h1>
-        {/*<p className="hero-text">
-          Prendas comodas, cortes modernos y detalles pensados para usar todos los dias.
-        </p> */}
-
-        <div className="hero-actions">
-          <a className="hero-btn hero-btn-primary" href="/busqueda">
-            Explorar catalogo
-          </a>
-          <a className="hero-btn hero-btn-ghost" href="/RopaInfo">
-            Ver destacados
-          </a>
-        </div>
-
-      </div>
-
-      <section className="home-benefits" aria-label="Beneficios de la tienda">
-        <article className="benefit-card">
-          <img src="/marker.png" alt="" aria-hidden="true" />
-          <div>
-            <h3>Envios a todo el pais</h3>
-            <p>Despacho rapido y seguimiento de tu pedido.</p>
+      <div className="hero-editorial-grid">
+        {heroImages.map((image) => (
+          <div className="hero-editorial-image" key={image.src}>
+            <img
+              className="hero-editorial-image-base"
+              src={image.src}
+              alt={image.alt}
+              fetchPriority="high"
+            />
+            <img
+              className="hero-editorial-image-dark"
+              src={image.dark}
+              alt=""
+              aria-hidden="true"
+              fetchPriority="high"
+            />
           </div>
-        </article>
-
-        <article className="benefit-card">
-          <img src="/credit-card.png" alt="" aria-hidden="true" />
-          <div>
-            <h3>Pagos seguros</h3>
-            <p>Tarjeta, transferencia y cuotas sin interes.</p>
-          </div>
-        </article>
-
-        <article className="benefit-card">
-          <img src="/shopping-cart.png" alt="" aria-hidden="true" />
-          <div>
-            <h3>Cambios simples</h3>
-            <p>Gestiona cambios de talle sin vueltas.</p>
-          </div>
-        </article>
-      </section>
-
-      <div className="what">
-        <img className="whatsapp" src="/Whatsapp.png" alt="WhatsApp" />
+        ))}
       </div>
     </section>
-
   );
 }
 

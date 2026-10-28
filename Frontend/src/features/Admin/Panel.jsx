@@ -21,6 +21,8 @@ import RopaOculta from "../Ropa/RopaOculta";
 import { getUserFromToken, logout, refreshAuthUser } from "../../utils/auth";
 import "../../styles/Admin/adminPanel.css";
 import AdminPedidos from "../Pedidos/AdminPedidos";
+import { Layers } from "lucide-react";
+import PacksAdmin from "../../components/Packs/PacksAdmin";
 
 function Panel() {
   const [activeView, setActiveView] = useState("ver");
@@ -60,41 +62,47 @@ function Panel() {
 
   const menuItems = [
     {
-    key: "pedidos",
-    label: "Pedidos",
-    subtitle: "Mostrar productos para enviar",
-    icon: Send,
-  },
-  {
-    key: "ver",
-    label: "Ver productos",
-    subtitle: "Inventario y estado general",
-    icon: LayoutDashboard,
-  },
-  {
-    key: "crear",
-    label: "Crear producto",
-    subtitle: "Alta de nuevos articulos",
-    icon: PlusCircle,
-  },
-  {
-    key: "editar",
-    label: "Editar producto",
-    subtitle: "Actualizar datos y precios",
-    icon: Edit3,
-  },
-  {
-    key: "eliminar",
-    label: "Eliminar producto",
-    subtitle: "Ocultar o borrar del catalogo",
-    icon: Trash2,
-  },
-  {
-    key: "oculta",
-    label: "Productos ocultos",
-    subtitle: "Reactivar articulos inactivos",
-    icon: EyeOff,
-  },
+      key: "pedidos",
+      label: "Pedidos",
+      subtitle: "Mostrar productos para enviar",
+      icon: Send,
+    },
+    {
+      key: "ver",
+      label: "Ver productos",
+      subtitle: "Inventario y estado general",
+      icon: LayoutDashboard,
+    },
+    {
+      key: "crear",
+      label: "Crear producto",
+      subtitle: "Alta de nuevos articulos",
+      icon: PlusCircle,
+    },
+    {
+      key: "packs",
+      label: "Packs",
+      subtitle: "Crear y administrar outfits",
+      icon: Layers,
+    },
+    {
+      key: "editar",
+      label: "Editar producto",
+      subtitle: "Actualizar datos y precios",
+      icon: Edit3,
+    },
+    {
+      key: "eliminar",
+      label: "Eliminar producto",
+      subtitle: "Ocultar o borrar del catalogo",
+      icon: Trash2,
+    },
+    {
+      key: "oculta",
+      label: "Productos ocultos",
+      subtitle: "Reactivar articulos inactivos",
+      icon: EyeOff,
+    },
 
   ];
 
@@ -110,6 +118,7 @@ function Panel() {
       ver: <VerProductos />,
       crear: <CrearProducto />,
       editar: <EditarProducto />,
+      packs: <PacksAdmin />,
       eliminar: <EliminarProducto />,
       oculta: <RopaOculta />,
       pedidos: <AdminPedidos />,
@@ -137,12 +146,12 @@ function Panel() {
       )}
 
       <div className={cn("admin-layout", isPedidosView && "admin-layout-full")}>
-          {!isPedidosView && sidebarOpen && (
-            <div
-              onClick={() => setSidebarOpen(false)}
-              className="sidebar-overlay"
-            />
-          )}
+        {!isPedidosView && sidebarOpen && (
+          <div
+            onClick={() => setSidebarOpen(false)}
+            className="sidebar-overlay"
+          />
+        )}
 
         {!isPedidosView && (
           <aside className={cn("sidebar", sidebarOpen && "open")}>

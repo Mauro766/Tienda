@@ -7,6 +7,7 @@ import ProductSection from "../components/ProductSection";
 import Footer from "../components/Footer";
 import { getProductos, getProductosMasVendidos } from "../services/RopaService";
 import Historia from "../components/historia";
+import PackCarrusel from "../components/pack-carrusel";
 import "../styles/home.css";
 
 function Home() {
@@ -46,6 +47,8 @@ function Home() {
           <Link viewTransition to="/busqueda?cat=Buzos" className="category-pill">Buzos</Link>
           <Link viewTransition to="/busqueda?cat=Camperas" className="category-pill">Camperas</Link>
         </section>
+
+        <PackCarrusel />
 
         <ProductSection
           title="Nuevos Ingresos"

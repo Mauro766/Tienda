@@ -14,12 +14,10 @@ export default function Marcas() {
             <div className="carrusel-fade carrusel-fade-left" />
 
             <div className="carrusel-track">
-                {/* 4 copias para que siempre haya logos visibles */}
-                {[...Array(4)].map((_, copy) =>
-                    logos.map((logo, i) => (
-                        <img key={`${copy}-${i}`} src={logo.src} alt="" style={logo.style} />
-                    ))
-                )}
+                <h2>Pagina de prueba</h2>
+                <h2>Pagina de prueba</h2>
+                <h2>Pagina de prueba</h2>
+                <h2>Pagina de prueba</h2>
             </div>
 
             {/* Fade derecha */}
