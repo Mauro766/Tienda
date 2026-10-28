@@ -37,8 +37,6 @@ function Home() {
     <>
       <Header />
       <Hero />
-      <Marcas/>
-
       <main className="home-main">
         <section className="home-categories" aria-label="Categorias destacadas">
           <Link viewTransition to="/busqueda?cat=Remeras" className="category-pill">Remeras</Link>
@@ -64,7 +62,6 @@ function Home() {
           />
         )}
       </main>
-      <Historia/>
       <Footer />
     </>
   );
