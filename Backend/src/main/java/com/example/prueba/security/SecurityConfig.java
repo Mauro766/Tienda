@@ -26,7 +26,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CsrfException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -53,6 +52,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             ObjectMapper objectMapper,
+            @Value("${app.auth.csrf.secret:}") String csrfSecret,
             @Value("${app.auth.cookie.secure:false}") boolean secureCookie,
             @Value("${app.auth.cookie.same-site:Lax}") String sameSitePolicy) throws Exception {
 
@@ -60,11 +60,7 @@ public class SecurityConfig {
             throw new IllegalStateException("SameSite=None requiere cookies Secure");
         }
 
-        CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
-        csrfTokenRepository.setCookiePath("/");
-        csrfTokenRepository.setCookieCustomizer(cookie -> cookie
-                .secure(secureCookie)
-                .sameSite(sameSitePolicy));
+        SignedCsrfTokenRepository csrfTokenRepository = new SignedCsrfTokenRepository(csrfSecret);
 
         http
                 .cors(Customizer.withDefaults())

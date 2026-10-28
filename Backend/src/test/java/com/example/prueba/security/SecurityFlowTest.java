@@ -59,7 +59,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
         UsuarioController.class,
         RopaController.class,
         ImagenController.class
-}, properties = "app.cors.allowed-origins=https://tienda-eight-chi.vercel.app")
+}, properties = {
+        "app.cors.allowed-origins=https://tienda-eight-chi.vercel.app",
+        "app.auth.csrf.secret=test-only-csrf-signing-key-that-is-at-least-32-bytes"
+})
 @Import({ SecurityConfig.class, JwtFilter.class, StorageService.class })
 class SecurityFlowTest {
 
@@ -194,6 +197,19 @@ class SecurityFlowTest {
     }
 
     @Test
+    void logoutStillRequiresCsrfAndClearsTheAuthenticationCookie() throws Exception {
+        CsrfSession csrf = csrfSession();
+        mockMvc.perform(withCsrf(post("/auth/logout")
+                        .cookie(new Cookie("auth_token", "jwt-valido")),
+                csrf))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Set-Cookie",
+                        org.hamcrest.Matchers.allOf(
+                                org.hamcrest.Matchers.containsString("auth_token="),
+                                org.hamcrest.Matchers.containsString("Max-Age=0"))));
+    }
+
+    @Test
     void catalogAndImageReadsDoNotRequireAuthentication() throws Exception {
         when(ropaService.listar(isNull(), any())).thenReturn(new PageImpl<>(List.of()));
         String imageName = "public-image-" + System.nanoTime() + ".png";
@@ -263,18 +279,19 @@ class SecurityFlowTest {
     private CsrfSession csrfSession() throws Exception {
         MvcResult result = mockMvc.perform(get("/auth/csrf"))
                 .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")))
                 .andReturn();
 
         JsonNode body = objectMapper.readTree(result.getResponse().getContentAsString());
-        Cookie cookie = result.getResponse().getCookie("XSRF-TOKEN");
-        assertNotNull(cookie);
-        return new CsrfSession(cookie, body.get("token").asText());
+        assertFalse(result.getResponse().containsHeader("Set-Cookie"));
+        assertNotNull(body.get("token"));
+        return new CsrfSession(body.get("token").asText());
     }
 
     private MockHttpServletRequestBuilder withCsrf(
             MockHttpServletRequestBuilder request,
             CsrfSession csrf) {
-        return request.cookie(csrf.cookie()).header("X-XSRF-TOKEN", csrf.token());
+        return request.header("X-XSRF-TOKEN", csrf.token());
     }
 
     private Usuario usuario() {
@@ -287,6 +304,6 @@ class SecurityFlowTest {
         return usuario;
     }
 
-    private record CsrfSession(Cookie cookie, String token) {
+    private record CsrfSession(String token) {
     }
 }

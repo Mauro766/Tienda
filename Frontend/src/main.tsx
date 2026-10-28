@@ -5,16 +5,7 @@ import "./styles/main.css";
 import { API_URL } from './config';
 
 const originalFetch = window.fetch.bind(window);
-const csrfCookieName = "XSRF-TOKEN";
 const csrfHeaderName = "X-XSRF-TOKEN";
-
-const getCookie = (name: string) => {
-  const cookie = document.cookie
-    .split("; ")
-    .find((entry) => entry.startsWith(`${name}=`));
-
-  return cookie ? decodeURIComponent(cookie.slice(name.length + 1)) : null;
-};
 
 window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   const url =
@@ -35,26 +26,21 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   const headers = new Headers(init?.headers || (input instanceof Request ? input.headers : undefined));
 
   if (!["GET", "HEAD", "OPTIONS", "TRACE"].includes(method)) {
-    let csrfToken = getCookie(csrfCookieName);
+    const csrfResponse = await originalFetch(`${API_URL}/auth/csrf`, {
+      credentials: "include",
+      cache: "no-store",
+    });
 
-    if (!csrfToken) {
-      const csrfResponse = await originalFetch(`${API_URL}/auth/csrf`, {
-        credentials: "include",
-      });
-
-      if (!csrfResponse.ok) {
-        throw new Error(`No se pudo obtener el token CSRF (${csrfResponse.status})`);
-      }
-
-      const csrfData = await csrfResponse.json();
-      csrfToken = getCookie(csrfCookieName) || csrfData.token;
+    if (!csrfResponse.ok) {
+      throw new Error(`No se pudo obtener el token CSRF (${csrfResponse.status})`);
     }
 
-    if (!csrfToken) {
+    const csrfData: { token?: string } = await csrfResponse.json();
+    if (!csrfData.token) {
       throw new Error("El backend no entregó el token CSRF");
     }
 
-    headers.set(csrfHeaderName, csrfToken);
+    headers.set(csrfHeaderName, csrfData.token);
   }
 
   return originalFetch(input, {
